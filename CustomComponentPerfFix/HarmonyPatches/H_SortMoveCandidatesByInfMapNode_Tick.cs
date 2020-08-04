@@ -28,9 +28,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 typeof(H_SortMoveCandidatesByInfMapNode_Tick)
                     .GetMethod(nameof(Transpiler), AccessTools.all);
 
-            HarmonyInstance.DEBUG = true;
             HarmonyUtils.Harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
-            HarmonyInstance.DEBUG = false;
         }
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> codeInstructions)
