@@ -1,0 +1,9 @@
+{
+    "Name": "PerformanceFixes",
+    "Enabled": true,
+    "Version": "0.0.1",
+    "Description": "Performance fixes",
+    "Author": "NotooShabby",
+    "DLL": "RogueTechPerfFixes.dll",
+    "DLLEntryPoint": "RogueTechPerfFixes.HarmonyUtils.Init"
+}
