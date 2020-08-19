@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Harmony;
 using RogueTechPerfFixes.HarmonyPatches;
+using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes
 {
@@ -19,7 +20,7 @@ namespace RogueTechPerfFixes
         public static void Init()
         {
             Harmony.PatchAll();
-            H_SortMoveCandidatesByInfMapNode_Tick.Init();
+            //H_SortMoveCandidatesByInfMapNode_Tick.Init();
         }
 
         public delegate ref U RefGetter<U>();
@@ -51,7 +52,7 @@ namespace RogueTechPerfFixes
             var dm = new DynamicMethod(s_name, typeof(U), new[] { typeof(T) }, typeof(T), true);
 
             //   b.) replace with desired 'ByRef' return value
-            dm.GetType().GetField("m_returnType", bf).SetValue(dm, typeof(U).MakeByRefType());
+            dm.GetType().GetField("returnType", bf).SetValue(dm, typeof(U).MakeByRefType());
 
             var il = dm.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
@@ -59,6 +60,40 @@ namespace RogueTechPerfFixes
             il.Emit(OpCodes.Ret);
 
             return (RefGetter<T, U>)dm.CreateDelegate(typeof(RefGetter<T, U>));
+        }
+
+        /// <summary>
+        /// Create a pointer for instance field <paramref name="s_field"/> of <paramref name="type"/>.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="s_field"></param>
+        /// <returns> Pointer to <paramref name="s_field"/></returns>
+        /// <remarks> Source: https://stackoverflow.com/a/45046664/13073994 </remarks>
+        public static RefGetter<object, U> CreateInstanceFieldRef<U>(Type type, String s_field)
+        {
+            const BindingFlags bf = BindingFlags.NonPublic |
+                                    BindingFlags.Instance |
+                                    BindingFlags.DeclaredOnly;
+
+            var fi = type.GetField(s_field, bf);
+            if (fi == null)
+                throw new MissingFieldException(type.Name, s_field);
+
+            var s_name = "__refget_" + type.Name + "_fi_" + fi.Name;
+
+            // workaround for using ref-return with DynamicMethod:
+            //   a.) initialize with dummy return value
+            var dm = new DynamicMethod(s_name, typeof(U), new[] { typeof(object) }, type, true);
+
+            //   b.) replace with desired 'ByRef' return value
+            dm.GetType().GetField("returnType", bf).SetValue(dm, typeof(U).MakeByRefType());
+
+            var il = dm.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, fi);
+            il.Emit(OpCodes.Ret);
+
+            return (RefGetter<object, U>)dm.CreateDelegate(typeof(RefGetter<object, U>));
         }
 
         /// <summary>
@@ -86,7 +121,40 @@ namespace RogueTechPerfFixes
             var dm = new DynamicMethod(s_name, typeof(U), null, typeof(T), true);
 
             //   b.) replace with desired 'ByRef' return value
-            dm.GetType().GetField("m_returnType", bf).SetValue(dm, typeof(U).MakeByRefType());
+            dm.GetType().GetField("returnType", AccessTools.all).SetValue(dm, typeof(U).MakeByRefType());
+
+            var il = dm.GetILGenerator();
+            il.Emit(OpCodes.Ldsflda, fi);
+            il.Emit(OpCodes.Ret);
+
+            return (RefGetter<U>)dm.CreateDelegate(typeof(RefGetter<U>));
+        }
+
+        /// <summary>
+        /// Create a pointer for static field <paramref name="s_field"/>
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="s_field"></param>
+        /// <returns> Pointer to <paramref name="s_field"/></returns>
+        /// <remarks> Source: https://stackoverflow.com/a/45046664/13073994 </remarks>
+        public static RefGetter<U> CreateStaticFieldRef<U>(Type type, String s_field)
+        {
+            const BindingFlags bf = BindingFlags.NonPublic |
+                                    BindingFlags.Static |
+                                    BindingFlags.DeclaredOnly;
+
+            var fi = type.GetField(s_field, bf);
+            if (fi == null)
+                throw new MissingFieldException(type.Name, s_field);
+
+            var s_name = "__refget_" + type.Name + "_fi_" + fi.Name;
+
+            // workaround for using ref-return with DynamicMethod:
+            //   a.) initialize with dummy return value
+            var dm = new DynamicMethod(s_name, typeof(U), null, type, true);
+
+            //   b.) replace with desired 'ByRef' return value
+            dm.GetType().GetField("returnType", AccessTools.all).SetValue(dm, typeof(U).MakeByRefType());
 
             var il = dm.GetILGenerator();
             il.Emit(OpCodes.Ldsflda, fi);

@@ -14,12 +14,16 @@ namespace RogueTechPerfFixes.HarmonyPatches
     {
         public static bool Prefix(MapTerrainDataCell cell, ref bool __result)
         {
+            if (cell is null)
+                return true;
+
             return !CacheManager.WatchCache.TryGetValue(cell, out __result);
         }
 
         public static void Postfix(MapTerrainDataCell cell, ref bool __result)
         {
-            CacheManager.WatchCache[cell] = __result;
+            if (!cell.MapEncounterLayerDataCell.HasBuilding)
+                CacheManager.WatchCache[cell] = __result;
         }
     }
 }

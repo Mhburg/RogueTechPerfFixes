@@ -10,5 +10,7 @@ namespace RogueTechPerfFixes
     public static class Utils
     {
         public static ILog Logger { get; } = HBS.Logging.Logger.GetLogger("RogueTechPerfFixes", LogLevel.Debug);
+
+        public const string LOG_HEADER = "[PerfFix]";
     }
 }

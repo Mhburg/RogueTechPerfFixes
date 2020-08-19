@@ -22,8 +22,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
             if (!AuraTable.TryGetValue(___owner, out AuraState auraState))
                 AuraTable[___owner] = auraState = new AuraState();
 
-            if (auraState.LastUpdate++ % _updateInterval == 0)
-                return true;
+            unchecked
+            {
+                if (auraState.LastUpdate++ % _updateInterval == 0)
+                    return true;
+            }
 
             __result = auraState.LastState;
             return false;

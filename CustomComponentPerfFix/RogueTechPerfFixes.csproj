@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\RogueTechPerfFix\</OutputPath>
+    <OutputPath>..\Build\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\Release\RogueTechPerfFix\</OutputPath>
+    <OutputPath>..\Build\Release\RogueTechPerfFix\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,7 +36,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="CustomComponents">
@@ -46,6 +46,12 @@
     <Reference Include="CustomUnits">
       <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomUnits\CustomUnits.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\ModTek\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\ModTek\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -65,11 +71,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HarmonyPatches\H_CombatAuraReticle_DesiredAuraReceptionState.cs" />
-    <Compile Include="HarmonyPatches\H_SortMoveCandidatesByInfMapNode_Tick.cs" />
+    <None Include="HarmonyPatches\H_CombatAuraReticle_DesiredAuraReceptionState.cs" />
+    <Compile Include="HarmonyPatches\H_AbstractActor.cs" />
+    <None Include="HarmonyPatches\H_BresenhamLine.cs" />
+    <Compile Include="HarmonyPatches\H_ExportInfluenceMapToCSV.cs" />
+    <None Include="HarmonyPatches\H_SortMoveCandidatesByInfMapNode_Tick.cs" />
+    <None Include="HarmonyPatches\H_ElementManager_RefreshCommandBuffer.cs" />
+    <None Include="HarmonyPatches\H_FindBlockerBetween.cs" />
+    <None Include="HarmonyPatches\H_FindBlockerReciprocal.cs" />
+    <Compile Include="Injection\CecilManager.cs" />
+    <Compile Include="Injection\IInjector.cs" />
+    <None Include="Injection\I_AbstractActor_expectedArmorValues.cs" />
+    <Compile Include="Injection\I_BTLight.cs" />
+    <Compile Include="Injection\I_DesiredAuraReceptionState.cs" />
+    <None Include="Injection\I_SortMoveCandidatesByInfMapNode.cs" />
+    <Compile Include="Mod\Mod.cs" />
     <Compile Include="Utils\Utils.cs" />
     <None Include="Cache\CacheManager.cs" />
-    <Compile Include="HarmonyPatches\H_Briefing_InitializeContract.cs" />
+    <None Include="HarmonyPatches\H_CombatGameState.cs" />
     <None Include="HarmonyPatches\H_TerraiWaterHelper_HasWater.cs" />
     <None Include="HarmonyPatches\H_EffectManager_GetAllEffectsTargeting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

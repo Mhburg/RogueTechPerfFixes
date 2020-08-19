@@ -7,96 +7,110 @@ using System.Text;
 using System.Threading.Tasks;
 using BattleTech;
 using Harmony;
+using HBS.Logging;
+using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
     public static class H_SortMoveCandidatesByInfMapNode_Tick
     {
+        private const string TARGET_TYPE_NAME = "SortMoveCandidatesByInfMapNode";
+
         private static Assembly _HBSAssembly = Assembly.GetAssembly(typeof(BehaviorNode));
 
-        private static Type _thisType = typeof(H_SortMoveCandidatesByInfMapNode_Tick);
+        private static MethodInfo _targetMethod;
 
-        private static Task<bool> _thinkingTask = null;
+        private static Type _comparer;
+
+        private static MethodInfo _drawDebugLines;
+
+        private static HarmonyUtils.RefGetter<object, bool> _ownTaskField;
+
+        private static HarmonyUtils.RefGetter<Task<bool>> _thinkTaskField;
+
+        private static bool _taskRunning = false;
 
         public static void Init()
         {
-            MethodInfo original =
-                _HBSAssembly.GetType("SortMoveCandidatesByInfMapNode")
-                           .GetMethod("Tick", AccessTools.all);
+            Type origType = _HBSAssembly.GetType(TARGET_TYPE_NAME);
 
-            MethodInfo transpiler =
-                typeof(H_SortMoveCandidatesByInfMapNode_Tick)
-                    .GetMethod(nameof(Transpiler), AccessTools.all);
+            try
+            {
+                _ownTaskField =
+                    HarmonyUtils.CreateInstanceFieldRef<bool>(origType,
+                        I_SortMoveCandidatesByInfMapNode.OwnTaskTypeName);
+                _thinkTaskField = HarmonyUtils.CreateStaticFieldRef<Task<bool>>(origType,
+                    I_SortMoveCandidatesByInfMapNode.ThinkTaskTypeName);
 
-            HarmonyUtils.Harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
+                _comparer = origType.GetNestedType("AccumulatorComparer", AccessTools.all);
+
+                _drawDebugLines = origType.GetMethod("drawDebugLines", AccessTools.all);
+
+                _targetMethod = origType.GetMethod("Tick", AccessTools.all);
+                MethodInfo prefix =
+                    typeof(H_SortMoveCandidatesByInfMapNode_Tick)
+                        .GetMethod(nameof(Prefix), AccessTools.all);
+
+                HarmonyUtils.Harmony.Patch(_targetMethod, new HarmonyMethod(prefix));
+            }
+            catch (Exception e)
+            {
+                Utils.Logger.LogError($"{Utils.LOG_HEADER} Failed to patch {TARGET_TYPE_NAME}", e);
+            }
         }
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        public static bool Prefix(ref BehaviorTreeResults __result, AbstractActor ___unit, BehaviorNode __instance)
         {
-            /*********************** Before Patch *******************************************/
-            //  if (!unit.BehaviorTree.influenceMapEvaluator.RunEvaluationForSeconds(0.02f))
-            //  {
-            //  	return new BehaviorTreeResults(BehaviorNodeState.Running);
-            //  }
-
-            /*********************** After Patch *******************************************/
-            //  if (_thinkingTask == null)
-            //  {
-            //  	_thinkingTask = Task.Run<bool>(() => this.unit.BehaviorTree.influenceMapEvaluator.RunEvaluationForSeconds(2.14748365E+09f));
-            //  }
-            //  if (!_thinkingTask.IsCompleted)
-            //  {
-            //  	return new BehaviorTreeResults(BehaviorNodeState.Running);
-            //  }
-            //  _thinkingTask = null;
-
-            int i = 0;
-            int insertionPoint = -1;
-            List<CodeInstruction> code = new List<CodeInstruction>(codeInstructions);
-
-            for (; i < code.Count; i++)
-            {
-                // There is only one opcode that loads float number
-                if (code[i].opcode == OpCodes.Ldc_R4)
-                {
-                    insertionPoint = i - 2;
-                    code.RemoveRange(insertionPoint, 4);
-                    break;
-                }
-            }
-
-            // fail-safe
-            if (insertionPoint == -1)
-                return code;
-
-            code.Insert(
-                insertionPoint
-                , new CodeInstruction(
-                    OpCodes.Call
-                    , _thisType.GetMethod(nameof(RunTask), AccessTools.all)));
-
-            for (i = insertionPoint; i < code.Count; i++)
-            {
-                if (code[i].opcode == OpCodes.Ldarg_0)
-                {
-                    insertionPoint = i;
-                    break;
-                }
-            }
-
-            code.Insert(++insertionPoint, new CodeInstruction(OpCodes.Ldnull));
-            code.Insert(++insertionPoint, new CodeInstruction(OpCodes.Stsfld, _thisType.GetField(nameof(_thinkingTask), AccessTools.all)));
-
-            return code;
+            __result = AltTick(___unit, __instance);
+            return false;
         }
 
-        private static bool RunTask(AbstractActor unit)
+        public static BehaviorTreeResults AltTick(AbstractActor unit, BehaviorNode instance)
         {
-            if (_thinkingTask == null)
-                _thinkingTask = Task.Run(
-                    () => unit.BehaviorTree.influenceMapEvaluator.RunEvaluationForSeconds(int.MaxValue));
+            if (unit.BehaviorTree.movementCandidateLocations.Count == 0)
+            {
+                unit.BehaviorTree.influenceMapEvaluator.Reset();
+                return new BehaviorTreeResults(BehaviorNodeState.Failure);
+            }
 
-            return _thinkingTask.IsCompleted;
+            ref Task<bool> thinkTask = ref _thinkTaskField();
+            ref bool ownTask = ref _ownTaskField(instance);
+            if (thinkTask == null)
+            {
+                thinkTask = Task.Run(() => unit.BehaviorTree.influenceMapEvaluator.RunEvaluationForSeconds(float.MaxValue));
+                ownTask = true;
+            }
+
+            if (!thinkTask.IsCompleted)
+                return new BehaviorTreeResults(BehaviorNodeState.Running);
+
+            if (!ownTask)
+                return new BehaviorTreeResults(BehaviorNodeState.Running);
+
+            if (thinkTask.Exception != null)
+            {
+                Utils.Logger.LogError($"{Utils.LOG_HEADER} Think task has run into exceptions", thinkTask.Exception.Flatten());
+                thinkTask = null;
+                ownTask = false;
+                return new BehaviorTreeResults(BehaviorNodeState.Failure);
+            }
+            else if (!thinkTask.Result)
+            {
+                Utils.Logger.LogError($"{Utils.LOG_HEADER} Think task fails without exception");
+                thinkTask = null;
+                ownTask = false;
+                return new BehaviorTreeResults(BehaviorNodeState.Failure);
+            }
+
+            thinkTask = null;
+            ownTask = false;
+
+            unit.BehaviorTree.influenceMapEvaluator.Reset();
+            IComparer<WorkspaceEvaluationEntry> comparer = (IComparer<WorkspaceEvaluationEntry>)Activator.CreateInstance(_comparer);
+            unit.BehaviorTree.influenceMapEvaluator.WorkspaceEvaluationEntries.Sort(
+                0, unit.BehaviorTree.influenceMapEvaluator.firstFreeWorkspaceEvaluationEntryIndex, comparer);
+            _drawDebugLines.Invoke(instance, null);
+            return new BehaviorTreeResults(BehaviorNodeState.Success);
         }
     }
 }
