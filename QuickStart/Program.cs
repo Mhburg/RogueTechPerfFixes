@@ -17,10 +17,6 @@ namespace QuickStart
         static void Main(string[] args)
         {
             CecilManager.Init();
-            if (!CecilManager.HasError)
-                Console.WriteLine($"Patch without a hitch.");
-
-            Console.ReadLine();
         }
     }
 }

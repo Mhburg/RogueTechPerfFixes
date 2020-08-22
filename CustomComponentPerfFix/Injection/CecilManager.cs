@@ -21,7 +21,7 @@ namespace RogueTechPerfFixes.Injection
 
         public const string LocalVanillaAssemblyPath = @".\" + VanillaAssemblyName;
 
-        public const string BackUpAssemblyName = "Assembly-CSharp.dll.PerfFix.Orig";
+        public const string BackUpAssemblyName = "Assembly-CSharp.dll.PerfFix.orig";
 
         public const string CecilLog = @".\CecilLog.txt";
 
@@ -136,6 +136,7 @@ namespace RogueTechPerfFixes.Injection
 
                 _assembly.Write(VanillaAssemblyFullPath);
                 _assembly.Dispose();
+                File.AppendAllText(CecilLog, "All good here.");
             }
             catch (Exception e)
             {

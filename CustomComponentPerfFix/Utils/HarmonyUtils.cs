@@ -17,12 +17,6 @@ namespace RogueTechPerfFixes
 
         public static HarmonyInstance Harmony = HarmonyInstance.Create(HarmonyId);
 
-        public static void Init()
-        {
-            Harmony.PatchAll();
-            //H_SortMoveCandidatesByInfMapNode_Tick.Init();
-        }
-
         public delegate ref U RefGetter<U>();
 
         public delegate ref U RefGetter<in T, U>(T obj);

@@ -5,5 +5,10 @@
     "Description": "Performance fixes",
     "Author": "NotooShabby",
     "DLL": "RogueTechPerfFixes.dll",
-    "DLLEntryPoint": "RogueTechPerfFixes.HarmonyUtils.Init"
+    "DLLEntryPoint": "RogueTechPerfFixes.Mod.Init",
+    "Settings": {
+        "LogError": true,
+        "LogDebug": false,
+        "LogWarning": false 
+    } 
 }
