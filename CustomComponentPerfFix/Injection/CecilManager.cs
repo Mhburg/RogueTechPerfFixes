@@ -126,6 +126,7 @@ namespace RogueTechPerfFixes.Injection
             {
                 Injectors.Add(new I_DesiredAuraReceptionState());
                 Injectors.Add(new I_BTLight());
+                Injectors.Add(new I_BTLightController());
                 //Injectors.Add(new I_SortMoveCandidatesByInfMapNode());
 
                 foreach (IInjector injector in Injectors)

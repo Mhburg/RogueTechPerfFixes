@@ -11,7 +11,7 @@
     <AssemblyName>RogueTechPerfFixes</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,7 +36,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
+      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="CustomAmmoCategories">
@@ -90,17 +90,20 @@
     <None Include="HarmonyPatches\H_CombatAuraReticle_DesiredAuraReceptionState.cs" />
     <Compile Include="HarmonyPatches\H_AbstractActor.cs" />
     <None Include="HarmonyPatches\H_BresenhamLine.cs" />
+    <Compile Include="HarmonyPatches\H_BTLightController.cs" />
     <Compile Include="HarmonyPatches\H_EffectManager.cs" />
     <Compile Include="HarmonyPatches\H_ExportInfluenceMapToCSV.cs" />
     <None Include="HarmonyPatches\H_SortMoveCandidatesByInfMapNode_Tick.cs" />
     <None Include="HarmonyPatches\H_ElementManager_RefreshCommandBuffer.cs" />
     <None Include="HarmonyPatches\H_FindBlockerBetween.cs" />
     <None Include="HarmonyPatches\H_FindBlockerReciprocal.cs" />
+    <Compile Include="HarmonyPatches\H_MissileLauncherEffect__Update.cs" />
     <Compile Include="HarmonyPatches\H_TerraiWaterHelper.cs" />
     <Compile Include="Injection\CecilManager.cs" />
     <Compile Include="Injection\IInjector.cs" />
     <None Include="Injection\I_AbstractActor_expectedArmorValues.cs" />
     <Compile Include="Injection\I_BTLight.cs" />
+    <Compile Include="Injection\I_BTLightController.cs" />
     <Compile Include="Injection\I_DesiredAuraReceptionState.cs" />
     <None Include="Injection\I_SortMoveCandidatesByInfMapNode.cs" />
     <Compile Include="Mod\Mod.cs" />
