@@ -10,6 +10,9 @@ using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    /// <summary>
+    /// Allowed all newly added light sorted in a batch instead of sorting every time a new light is added.
+    /// </summary>
     public static class H_BTLightController
     {
         public static HarmonyUtils.RefGetter<List<BTLight>> Lights = HarmonyUtils.CreateStaticFieldRef<List<BTLight>>(typeof(BTLightController), "lightList");
@@ -30,6 +33,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             {
                 if (BTLightController.InBatchProcess)
                 {
+                    BTLightController.LightAdded = true;
                     if (!light.isInLightList)
                     {
                         ___lightList.Add(light);

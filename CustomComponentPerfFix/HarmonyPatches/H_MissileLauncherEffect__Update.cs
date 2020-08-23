@@ -20,7 +20,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         public static void Postfix()
         {
             BTLightController.InBatchProcess = false;
-            H_BTLightController.Lights().Sort();
+            if (BTLightController.LightAdded)
+            {
+                H_BTLightController.Lights().Sort();
+                BTLightController.LightAdded = false;
+            }
         }
     }
 }

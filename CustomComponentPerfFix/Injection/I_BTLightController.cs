@@ -14,6 +14,8 @@ namespace RogueTechPerfFixes.Injection
 
         private static FieldDefinition InBatchProcess;
 
+        private static FieldDefinition LightAdded;
+
         public static bool Init { get; private set; } = false;
 
         #region Implementation of IInjector
@@ -38,7 +40,13 @@ namespace RogueTechPerfFixes.Injection
                 , FieldAttributes.Public | FieldAttributes.Static
                 , boolReference);
 
+            LightAdded = new FieldDefinition(
+                nameof(LightAdded)
+                , FieldAttributes.Public | FieldAttributes.Static
+                , boolReference);
+
             type.Fields.Add(InBatchProcess);
+            type.Fields.Add(LightAdded);
         }
     }
 }
