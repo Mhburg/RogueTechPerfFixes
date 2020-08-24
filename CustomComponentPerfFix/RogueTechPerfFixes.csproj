@@ -111,6 +111,7 @@
     <None Include="HarmonyPatches\H_FindBlockerReciprocal.cs" />
     <Compile Include="HarmonyPatches\H_MissileLauncherEffect__Update.cs" />
     <Compile Include="HarmonyPatches\H_TerraiWaterHelper.cs" />
+    <Compile Include="HarmonyPatches\H_VisibilityCache.cs" />
     <Compile Include="Injection\CecilManager.cs" />
     <Compile Include="Injection\IInjector.cs" />
     <None Include="Injection\I_AbstractActor_expectedArmorValues.cs" />
@@ -118,6 +119,8 @@
     <Compile Include="Injection\I_BTLightController.cs" />
     <Compile Include="Injection\I_DesiredAuraReceptionState.cs" />
     <None Include="Injection\I_SortMoveCandidatesByInfMapNode.cs" />
+    <Compile Include="Models\ActionSemaphore.cs" />
+    <Compile Include="Models\VisibilityCacheGate.cs" />
     <Compile Include="Mod\Mod.cs" />
     <Compile Include="Mod\Settings.cs" />
     <Compile Include="Utils\RTPFLogger.cs" />

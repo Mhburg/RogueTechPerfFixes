@@ -20,6 +20,12 @@ namespace RogueTechPerfFixes.HarmonyPatches
             {
                 bool error = false;
 
+                if (AbstractActor_HandleDeath.GateActive)
+                {
+                    error = true;
+                    RTPFLogger.Error?.Write($"Something has gone wrong in handling actor death, resetting VisibilityCacheGate.");
+                }
+
                 if (H_AuraActorBody.GateActive)
                 {
                     error = true;
@@ -34,6 +40,15 @@ namespace RogueTechPerfFixes.HarmonyPatches
 
                 if (error)
                     LowVisibility.Object.VisibilityCacheGate.ExitAll();
+            }
+        }
+
+        [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.OnCombatGameDestroyed))]
+        public static class H_OnCombatGameDestroyed
+        {
+            public static void Postfix()
+            {
+                VisibilityCacheGate.Reset();
             }
         }
     }
