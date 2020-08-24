@@ -9,25 +9,32 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
-    [HarmonyPatch(typeof(CombatGameState))]
-    [HarmonyPatch("_Init")]
-    public static class H_CombatGameState_init
+    public static class H_CombatGameState
     {
-        public static void Postfix()
-        {
-            //CacheManager.WatchCache.Clear();
-        }
+        private const string ACTIVE_GATE = "{0} has active visibility cache gate.\n";
 
-    }
-
-    [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.OnCombatGameDestroyed))]
-    public static class H_CombatGameState_OnCombatGameDestroyed
-    {
-        public static void Postfix()
+        [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.Update))]
+        public static class H_Update
         {
-            Utils.Logger.LogError($"{Utils.LOG_HEADER} Total time spent: {H_FindBlockerBetween.Time} on {H_FindBlockerBetween.Counter} calls, average : {H_FindBlockerBetween.Time / H_FindBlockerBetween.Counter}");
-            Utils.Logger.LogError($"{Utils.LOG_HEADER}Slowest time: {H_FindBlockerBetween.Slowest}, Fastest time: {H_FindBlockerBetween.Fastest}");
-            GC.Collect();
+            public static void Postfix()
+            {
+                bool error = false;
+
+                if (H_AuraActorBody.GateActive)
+                {
+                    error = true;
+                    RTPFLogger.Error?.Write(string.Format(ACTIVE_GATE, nameof(H_AuraActorBody)));
+                }
+
+                if (H_EffectManager.H_OnRoundEnd.GateActive)
+                {
+                    error = true;
+                    RTPFLogger.Error?.Write(string.Format(ACTIVE_GATE, nameof(H_EffectManager.H_OnRoundEnd)));
+                }
+
+                if (error)
+                    LowVisibility.Object.VisibilityCacheGate.ExitAll();
+            }
         }
     }
 }

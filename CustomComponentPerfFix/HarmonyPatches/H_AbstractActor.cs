@@ -15,6 +15,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
     {
         public static bool Prefix(ref bool __result)
         {
+            // If not in skirmish, return false immediately.
             if (UnityGameInstance.BattleTechGame.Simulation != null)
             {
                 __result = false;

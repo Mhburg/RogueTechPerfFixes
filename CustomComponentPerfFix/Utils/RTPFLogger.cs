@@ -18,8 +18,6 @@ namespace RogueTechPerfFixes
 
         private static SpinLock _spinLock = new SpinLock();
 
-        private static bool _acquiredLock = false;
-
         private static readonly ILog _logger = Logger.GetLogger("RogueTechPerfFixes", LogLevel.Debug);
 
         private const string CRITICAL_LOG_NAME = "CriticalLog.txt";
@@ -69,27 +67,35 @@ namespace RogueTechPerfFixes
 
         public void Write(string message)
         {
+            bool acquiredLock = false;
             try
             {
-                _spinLock.Enter(ref _acquiredLock);
-                switch (_mode)
+                _spinLock.Enter(ref acquiredLock);
+                if (acquiredLock)
                 {
-                    case Mode.Debug:
-                        _logger.LogDebug(FormatMessage(message));
-                        break;
-                    case Mode.Error:
-                        _logger.LogError(FormatMessage(message));
-                        break;
-                    case Mode.Warning:
-                        _logger.LogWarning(FormatMessage(message));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (_mode)
+                    {
+                        case Mode.Debug:
+                            _logger.LogDebug(FormatMessage(message));
+                            break;
+                        case Mode.Error:
+                            _logger.LogError(FormatMessage(message));
+                            break;
+                        case Mode.Warning:
+                            _logger.LogWarning(FormatMessage(message));
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                else
+                {
+                    LogCritical($"Can't acquire lock for writing log.\n");
                 }
             }
             finally
             {
-                if (_spinLock.IsHeld)
+                if (acquiredLock)
                     _spinLock.Exit();
             }
         }

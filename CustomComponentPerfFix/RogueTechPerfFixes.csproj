@@ -39,6 +39,10 @@
       <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CustomActivatableEquipment">
+      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomActivatableEquipment\CustomActivatableEquipment.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="CustomAmmoCategories">
       <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomAmmoCategories\CustomAmmoCategories.dll</HintPath>
       <Private>False</Private>
@@ -49,6 +53,11 @@
     </Reference>
     <Reference Include="CustomUnits">
       <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomUnits\CustomUnits.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LowVisibility, Version=0.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\Mods\LowVisibility\LowVisibility.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
@@ -90,6 +99,9 @@
     <None Include="HarmonyPatches\H_CombatAuraReticle_DesiredAuraReceptionState.cs" />
     <Compile Include="HarmonyPatches\H_AbstractActor.cs" />
     <None Include="HarmonyPatches\H_BresenhamLine.cs" />
+    <Compile Include="HarmonyPatches\H_ActorMovementSequence.cs" />
+    <Compile Include="HarmonyPatches\H_AttackDirector.cs" />
+    <Compile Include="HarmonyPatches\H_AuraActorBody.cs" />
     <Compile Include="HarmonyPatches\H_BTLightController.cs" />
     <Compile Include="HarmonyPatches\H_EffectManager.cs" />
     <Compile Include="HarmonyPatches\H_ExportInfluenceMapToCSV.cs" />
@@ -108,10 +120,10 @@
     <None Include="Injection\I_SortMoveCandidatesByInfMapNode.cs" />
     <Compile Include="Mod\Mod.cs" />
     <Compile Include="Mod\Settings.cs" />
-    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\RTPFLogger.cs" />
     <Compile Include="Utils\Utils.cs" />
     <None Include="Cache\CacheManager.cs" />
-    <None Include="HarmonyPatches\H_CombatGameState.cs" />
+    <Compile Include="HarmonyPatches\H_CombatGameState.cs" />
     <None Include="HarmonyPatches\H_TerraiWaterHelper_HasWater.cs" />
     <None Include="HarmonyPatches\H_EffectManager_GetAllEffectsTargeting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

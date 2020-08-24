@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using BattleTech;
 using Harmony;
+using LowVisibility.Object;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
     public static class H_EffectManager
     {
+        #region Memoization of effects for targets
+
         private readonly static Dictionary<object, List<Effect>> _cache = new Dictionary<object, List<Effect>>();
 
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.AddEffect))]
@@ -95,5 +98,39 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 }
             }
         }
+
+        #endregion
+
+        #region Pool refreshing work on visibility cache
+
+        [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.OnRoundEnd))]
+        public static class H_OnRoundEnd
+        {
+            private static int _counter = 0;
+
+            public static bool GateActive { get; private set; }
+
+            public static void Prefix()
+            {
+                VisibilityCacheGate.EnterGate();
+                GateActive = true;
+
+                _counter = VisibilityCacheGate.GetCounter;
+                RTPFLogger.Debug?.Write($"Enter visibility cache gate in {typeof(H_OnRoundEnd).FullName}:{nameof(Prefix)}\n");
+
+            }
+
+            public static void Postfix()
+            {
+                VisibilityCacheGate.ExitGate();
+
+                GateActive = false;
+
+                Utils.CheckExitCounter($"Fewer calls made to ExitGate() when reaches {typeof(H_OnRoundEnd).FullName}:{nameof(Postfix)}.\n", _counter);
+                RTPFLogger.Debug?.Write($"Exit visibility cache gate in {typeof(H_OnRoundEnd).FullName}:{nameof(Postfix)}\n");
+            }
+        }
+
+        #endregion
     }
 }

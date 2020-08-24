@@ -12,6 +12,10 @@ using Mono.Collections.Generic;
 
 namespace RogueTechPerfFixes.Injection
 {
+    /// <summary>
+    /// Add a field to store the InstanceId from Unity engine. InstanceId is used in sorting BTLights in the
+    /// <see cref="BattleTech.Rendering.BTLightController"/>
+    /// </summary>
     public class I_BTLight : IInjector
     {
         private const string _targetType = "BattleTech.Rendering.BTLight";
