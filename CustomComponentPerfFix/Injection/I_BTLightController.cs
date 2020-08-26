@@ -16,8 +16,6 @@ namespace RogueTechPerfFixes.Injection
 
         private static FieldDefinition LightAdded;
 
-        public static bool Init { get; private set; } = false;
-
         #region Implementation of IInjector
 
         public void Inject(Dictionary<string, TypeDefinition> typeTable, ModuleDefinition module)
@@ -25,7 +23,6 @@ namespace RogueTechPerfFixes.Injection
             if (typeTable.TryGetValue(_targetType, out TypeDefinition type))
             {
                 InjectField(type, module);
-                Init = true;
             }
         }
 

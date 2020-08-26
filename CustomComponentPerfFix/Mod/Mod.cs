@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Harmony;
-using Newtonsoft.Json;
 
 namespace RogueTechPerfFixes
 {
     public static class Mod
     {
         public static Settings Settings;
+
+        public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static void Init(string modDirectory, string settingsJSON)
         {

@@ -21,8 +21,8 @@ namespace RogueTechPerfFixes.HarmonyPatches
         {
             public static void Postfix()
             {
-                LowVisibility.Object.VisibilityCacheGate.EnterGate();
-                _counter = LowVisibility.Object.VisibilityCacheGate.GetCounter;
+                VisibilityCacheGate.EnterGate();
+                _counter = VisibilityCacheGate.GetCounter;
                 RTPFLogger.Debug?.Write($"Enter visibility cache gate in {typeof(H_OnAttackSequenceBegin).FullName}:{nameof(Postfix)}\n");
             }
         }
@@ -32,7 +32,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
         {
             public static void Postfix()
             {
-                LowVisibility.Object.VisibilityCacheGate.ExitGate();
+                VisibilityCacheGate.ExitGate();
 
                 Utils.CheckExitCounter($"Fewer calls made to ExitGate() when reaches AttackDirector.OnAttackSequenceEnd().\n", _counter);
                 RTPFLogger.Debug?.Write($"Exit visibility cache gate in {typeof(H_OnAttackSequenceEnd).FullName}:{nameof(Postfix)}\n");

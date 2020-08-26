@@ -15,11 +15,11 @@ namespace RogueTechPerfFixes
 
         public static void CheckExitCounter(string message, int counter)
         {
-            int exitCounter = LowVisibility.Object.VisibilityCacheGate.GetCounter;
+            int exitCounter = VisibilityCacheGate.GetCounter;
             if (exitCounter > counter)
             {
                 RTPFLogger.Error?.Write(message);
-                LowVisibility.Object.VisibilityCacheGate.ExitAll();
+                VisibilityCacheGate.ExitAll();
             }
         }
     }

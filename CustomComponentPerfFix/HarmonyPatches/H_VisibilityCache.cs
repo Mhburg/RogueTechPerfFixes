@@ -23,9 +23,6 @@ namespace RogueTechPerfFixes.HarmonyPatches
             [HarmonyPriority(0)]
             public static bool Prefix(VisibilityCache __instance)
             {
-                EWState.InBatchProcess = true;
-                EWState.EWStateCache.Clear();
-
                 if (VisibilityCacheGate.Active)
                 {
                     VisibilityCacheGate.AddActorToRefresh(GetOwningActor(__instance));
@@ -33,13 +30,6 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 }
 
                 return true;
-            }
-
-            // Highest priority
-            [HarmonyPriority(900)]
-            public static void Postfix()
-            {
-                EWState.InBatchProcess = false;
             }
         }
 
@@ -50,9 +40,6 @@ namespace RogueTechPerfFixes.HarmonyPatches
             [HarmonyPriority(0)]
             public static bool Prefix(VisibilityCache __instance)
             {
-                EWState.InBatchProcess = true;
-                EWState.EWStateCache.Clear();
-
                 if (VisibilityCacheGate.Active)
                 {
                     VisibilityCacheGate.AddActorToRefresh(GetOwningActor(__instance));
@@ -60,12 +47,6 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 }
 
                 return true;
-            }
-
-            [HarmonyPriority(900)]
-            public static void Postfix()
-            {
-                EWState.InBatchProcess = false;
             }
         }
     }

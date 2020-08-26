@@ -5,7 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using BattleTech;
 using Mono.Cecil;
+using FieldAttributes = Mono.Cecil.FieldAttributes;
+using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace RogueTechPerfFixes.Injection
 {
@@ -37,64 +40,14 @@ namespace RogueTechPerfFixes.Injection
 
         static CecilManager()
         {
-            if (File.Exists(VanillaAssemblyPath))
-            {
-                if (File.Exists(CecilLog))
-                    File.Delete(CecilLog);
-
-                try
-                {
-                    VanillaAssemblyFullPath = Path.GetFullPath(VanillaAssemblyPath);
-                    VanillaAssemblyDir = Path.GetDirectoryName(VanillaAssemblyFullPath);
-
-                    ReaderParameters parameters = new ReaderParameters();
-                    DefaultAssemblyResolver resolver = new DefaultAssemblyResolver();
-                    resolver.AddSearchDirectory(VanillaAssemblyDir);
-                    parameters.AssemblyResolver = resolver;
-
-                    string bak = Path.Combine(VanillaAssemblyDir, BackUpAssemblyName);
-
-                    // Restore the original dll if a backup exists.
-                    if (File.Exists(bak))
-                    {
-                        File.Delete(VanillaAssemblyFullPath);
-                        File.Move(bak, VanillaAssemblyFullPath);
-                    }
-
-                    // Make a backup for the game assembly
-                    File.Copy(VanillaAssemblyFullPath, bak, true);
-
-                    // Make a working copy in local
-                    File.Copy(VanillaAssemblyFullPath, LocalVanillaAssemblyPath, true);
-
-                    _assembly = AssemblyDefinition.ReadAssembly(bak, parameters);
-                    foreach (TypeDefinition type in _assembly.MainModule.Types)
-                        TypeTable.Add(type.FullName, type);
-
-                    _initialized = true;
-                }
-                catch (Exception e)
-                {
-                    HasError = true;
-                    File.AppendAllText(CecilLog, e.ToString());
-                }
-
-                return;
-            }
-
-            HasError = true;
-            File.AppendAllText(CecilLog, $"Incorrect file path: {VanillaAssemblyPath} to Assembly-CSharp.dll\n");
-        }
-
-        public static void Init()
-        {
-            if (!_initialized)
-                return;
+            VanillaAssemblyFullPath = Path.GetFullPath(VanillaAssemblyPath);
+            VanillaAssemblyDir = Path.GetDirectoryName(VanillaAssemblyFullPath);
 
             AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
             {
                 try
                 {
+
                     AssemblyName assemblyName = new AssemblyName(eventArgs.Name);
                     if (assemblyName.Name == CecilManager.VanillaAssemblyName)
                     {
@@ -121,6 +74,81 @@ namespace RogueTechPerfFixes.Injection
                 File.AppendAllText(CecilLog, "Can't resolve assembly reference\n");
                 return null;
             };
+
+            if (File.Exists(VanillaAssemblyPath))
+            {
+                if (File.Exists(CecilLog))
+                    File.Delete(CecilLog);
+
+                try
+                {
+                    ReaderParameters parameters = new ReaderParameters();
+                    DefaultAssemblyResolver resolver = new DefaultAssemblyResolver();
+                    resolver.AddSearchDirectory(VanillaAssemblyDir);
+                    parameters.AssemblyResolver = resolver;
+
+                    string bak = Path.Combine(VanillaAssemblyDir, BackUpAssemblyName);
+
+                    // Restore the original dll if a backup exists.
+                    if (File.Exists(bak))
+                    {
+                        File.Delete(VanillaAssemblyFullPath);
+                        File.Move(bak, VanillaAssemblyFullPath);
+                    }
+
+                    // Make a backup for the game assembly
+                    File.Copy(VanillaAssemblyFullPath, bak, true);
+
+                    // Make a working copy in local
+                    File.Copy(VanillaAssemblyFullPath, LocalVanillaAssemblyPath, true);
+
+                    _assembly = AssemblyDefinition.ReadAssembly(bak, parameters);
+                    FieldDefinition RTPFVersion =
+                        new FieldDefinition(
+                            nameof(RTPFVersion) + Mod.Version.ToString().Replace('.', '_')
+                            , FieldAttributes.Private
+                            , _assembly.MainModule.ImportReference(typeof(string)));
+
+                    TypeDefinition targetType = null;
+                    foreach (TypeDefinition type in _assembly.MainModule.Types)
+                    {
+                        if (type.Name == nameof(UnityGameInstance))
+                        {
+                            targetType = type;
+                            if (type.Fields.Any(f => f.Name == RTPFVersion.Name))
+                            {
+                                _initialized = false;
+                                File.AppendAllText(CecilLog, $"Already injected with version {RTPFVersion.Name}\n");
+                                _assembly.Dispose();
+                                File.Delete(bak);
+                                return;
+                            }
+                        }
+
+                        TypeTable.Add(type.FullName, type);
+                    }
+
+                    targetType.Fields.Add(RTPFVersion);
+                    _initialized = true;
+                }
+                catch (Exception e)
+                {
+                    HasError = true;
+                    File.AppendAllText(CecilLog, e.ToString());
+                }
+                return;
+            }
+
+            HasError = true;
+            File.AppendAllText(CecilLog, $"Incorrect file path: {VanillaAssemblyPath} to Assembly-CSharp.dll\n");
+        }
+
+        public static void Init()
+        {
+            if (!_initialized)
+                return;
+
+            File.AppendAllText(CecilLog, $"Start injecting...\n");
 
             try
             {

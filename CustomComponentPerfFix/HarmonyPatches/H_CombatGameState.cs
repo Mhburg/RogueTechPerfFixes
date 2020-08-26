@@ -39,7 +39,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 }
 
                 if (error)
-                    LowVisibility.Object.VisibilityCacheGate.ExitAll();
+                    VisibilityCacheGate.ExitAll();
             }
         }
 

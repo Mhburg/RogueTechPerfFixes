@@ -22,8 +22,8 @@ namespace RogueTechPerfFixes.HarmonyPatches
                 if (!_hasEntered)
                 {
                     _hasEntered = true;
-                    LowVisibility.Object.VisibilityCacheGate.EnterGate();
-                    _counter = LowVisibility.Object.VisibilityCacheGate.GetCounter;
+                    VisibilityCacheGate.EnterGate();
+                    _counter = VisibilityCacheGate.GetCounter;
                     RTPFLogger.Debug?.Write($"Enter visibility cache gate in {typeof(H_Update).FullName}:{nameof(Prefix)}\n");
                 }
             }
@@ -35,7 +35,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             public static void Postfix()
             {
                 _hasEntered = false;
-                LowVisibility.Object.VisibilityCacheGate.ExitGate();
+                VisibilityCacheGate.ExitGate();
 
                 Utils.CheckExitCounter($"Fewer calls made to ExitGate() when reaches ActorMovementSequence.CompleteMove().\n", _counter);
                 RTPFLogger.Debug?.Write($"Exit visibility cache gate in {typeof(H_CompleteMove).FullName}: {nameof(Postfix)}\n");

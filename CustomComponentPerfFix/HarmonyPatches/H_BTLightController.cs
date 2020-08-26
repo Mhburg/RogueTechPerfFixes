@@ -26,7 +26,8 @@ namespace RogueTechPerfFixes.HarmonyPatches
             /// <returns> Returns true, if the field is found in the class. </returns>
             public static bool Prepare()
             {
-                return I_BTLightController.Init;
+                return typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null
+                       && typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null;
             }
 
             public static bool Prefix(BTLight light, List<BTLight> ___lightList)
