@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using BattleTech.Rendering;
 using Harmony;
-using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
@@ -26,7 +25,8 @@ namespace RogueTechPerfFixes.HarmonyPatches
             /// <returns> Returns true, if the field is found in the class. </returns>
             public static bool Prepare()
             {
-                return typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null
+                return Mod.Settings.Patch.Vanilla
+                       && typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null
                        && typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null;
             }
 

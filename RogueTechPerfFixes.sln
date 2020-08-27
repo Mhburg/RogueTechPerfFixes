@@ -7,20 +7,40 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RogueTechPerfFixes", "Custo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickStart", "QuickStart\QuickStart.csproj", "{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Injection", "Injection\Injection.csproj", "{24B640F1-9AFC-44C6-8414-6F28F3097D5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonyPatches", "HarmonyPatches\HarmonyPatches.csproj", "{A8A5FA39-36E4-47CC-8A97-C71818A52150}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		InjectionOnly|Any CPU = InjectionOnly|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.InjectionOnly|Any CPU.ActiveCfg = InjectionOnly|Any CPU
+		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.InjectionOnly|Any CPU.Build.0 = InjectionOnly|Any CPU
 		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.InjectionOnly|Any CPU.ActiveCfg = InjectionOnly|Any CPU
+		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.InjectionOnly|Any CPU.Build.0 = InjectionOnly|Any CPU
 		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14D50CAC-3C0D-4036-8FF3-8EB814C2099B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.InjectionOnly|Any CPU.ActiveCfg = InjectionOnly|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.InjectionOnly|Any CPU.Build.0 = InjectionOnly|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24B640F1-9AFC-44C6-8414-6F28F3097D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8A5FA39-36E4-47CC-8A97-C71818A52150}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8A5FA39-36E4-47CC-8A97-C71818A52150}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8A5FA39-36E4-47CC-8A97-C71818A52150}.InjectionOnly|Any CPU.ActiveCfg = InjectionOnly|Any CPU
+		{A8A5FA39-36E4-47CC-8A97-C71818A52150}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8A5FA39-36E4-47CC-8A97-C71818A52150}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

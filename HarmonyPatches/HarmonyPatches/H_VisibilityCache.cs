@@ -19,8 +19,13 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(VisibilityCache), nameof(VisibilityCache.RebuildCache))]
         public static class VisibilityCache_RebuildCache
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             // Lowest priority
-            [HarmonyPriority(0)]
+            [HarmonyPriority(Priority.Last)]
             public static bool Prefix(VisibilityCache __instance)
             {
                 if (VisibilityCacheGate.Active)
@@ -36,8 +41,13 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(VisibilityCache), nameof(VisibilityCache.UpdateCacheReciprocal))]
         public static class VisibilityCache_UpdateCacheReciprocal
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             // Lowest priority
-            [HarmonyPriority(0)]
+            [HarmonyPriority(Priority.Last)]
             public static bool Prefix(VisibilityCache __instance)
             {
                 if (VisibilityCacheGate.Active)

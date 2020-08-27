@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\Build\Release\RogueTechPerfFix\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -35,6 +35,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'InjectionOnly|AnyCPU'">
+    <OutputPath>..\Build\InjectinoOnly\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -57,6 +66,10 @@
     <ProjectReference Include="..\CustomComponentPerfFix\RogueTechPerfFixes.csproj">
       <Project>{382c05d7-3bce-4e9d-b3d2-8aa85c66871e}</Project>
       <Name>RogueTechPerfFixes</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Injection\Injection.csproj">
+      <Project>{24b640f1-9afc-44c6-8414-6f28f3097d5b}</Project>
+      <Name>Injection</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

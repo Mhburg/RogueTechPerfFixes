@@ -18,6 +18,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.AddEffect))]
         public static class H_EffectManager_AddEffect
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix(Effect effect)
             {
                 if (!_cache.TryGetValue(effect.Target, out List<Effect> effects))
@@ -32,6 +37,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.CancelEffect))]
         public static class H_EffectManager_CancelEffect
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix(Effect e)
             {
                 if (_cache.TryGetValue(e.Target, out List<Effect> effects))
@@ -44,6 +54,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.EffectComplete))]
         public static class H_EffectManager_Effectcomplete
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix(Effect e)
             {
                 if (_cache.TryGetValue(e.Target, out List<Effect> effects))
@@ -56,6 +71,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.GetAllEffectsTargeting))]
         public static class H_EffectManager_GetAllEffectsTargeting
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static bool Prefix(object target, ref List<Effect> __result)
             {
                 if (_cache.TryGetValue(target, out List<Effect> effects))
@@ -71,6 +91,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(CombatGameState), "_Init")]
         public static class H_CombatGameState_Init
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix()
             {
                 _cache.Clear();
@@ -80,6 +105,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.OnCombatGameDestroyed))]
         public static class H_CombatGaemState_OnCombatGameDestroyed
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix()
             {
                 _cache.Clear();
@@ -89,6 +119,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.Hydrate))]
         public static class H_EffectManager_Hydrate
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
             public static void Postfix(List<Effect> ___effects)
             {
                 _cache.Clear();
@@ -109,6 +144,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
             private static int _counter = 0;
 
             public static bool GateActive { get; private set; }
+
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
 
             public static void Prefix()
             {

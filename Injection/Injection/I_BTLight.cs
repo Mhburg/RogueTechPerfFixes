@@ -28,6 +28,9 @@ namespace RogueTechPerfFixes.Injection
 
         public void Inject(Dictionary<string, TypeDefinition> typeTable, ModuleDefinition module)
         {
+            if (!Mod.Settings.Patch.Vanilla)
+                return;
+
             if (typeTable.TryGetValue(_targetType, out TypeDefinition type))
             {
                 _getInstanceID = Instruction.Create(
@@ -35,8 +38,8 @@ namespace RogueTechPerfFixes.Injection
                     , type.Module.ImportReference(typeof(UnityEngine.Object).GetMethod(nameof(UnityEngine.Object.GetInstanceID))));
 
                 InjectField(type, module);
-                InitField(type);
-                InjectIL(type);
+                if (InitField(type))
+                    InjectIL(type);
             }
             else
             {
@@ -67,13 +70,13 @@ namespace RogueTechPerfFixes.Injection
             //ilProcessor.Emit(_getInstanceID.OpCode, _getInstanceID.Operand as MethodReference);
         }
 
-        private static void InitField(TypeDefinition type)
+        private static bool InitField(TypeDefinition type)
         {
             List<MethodDefinition> consturctors = type.GetConstructors().ToList();
             if (consturctors.Count == 0)
             {
-                File.AppendAllText(CecilManager.CecilLog, $"Can't find constructor for BTLight\n");
-                throw new NotImplementedException("Can't find constructor for BTLight");
+                RTPFLogger.LogCritical($"Can't find constructor for BTLight\n");
+                return false;
             }
 
             foreach (MethodDefinition consturctor in consturctors)
@@ -95,6 +98,8 @@ namespace RogueTechPerfFixes.Injection
                     ctorEnd
                     , Instruction.Create(OpCodes.Stfld, InstanceId));
             }
+
+            return true;
         }
 
         private static void InjectIL(TypeDefinition type)
@@ -103,6 +108,7 @@ namespace RogueTechPerfFixes.Injection
             if (method == null)
             {
                 File.AppendAllText(CecilManager.CecilLog, $"Can't find target method: BTLight.CompareTo\n");
+                return;
             }
 
             Instruction loadField = Instruction.Create(OpCodes.Ldfld, InstanceId);
@@ -123,6 +129,7 @@ namespace RogueTechPerfFixes.Injection
             if (loadFieldPosition.Count != 2)
             {
                 File.AppendAllText(CecilManager.CecilLog, $"Can't patch BTLight.CompareTo\n");
+                return;
             }
 
             foreach (int i in loadFieldPosition)

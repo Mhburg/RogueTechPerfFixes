@@ -19,6 +19,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(AttackDirector), nameof(AttackDirector.OnAttackSequenceBegin))]
         public static class H_OnAttackSequenceBegin
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Postfix()
             {
                 VisibilityCacheGate.EnterGate();
@@ -30,6 +35,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(AttackDirector), nameof(AttackDirector.OnAttackSequenceEnd))]
         public static class H_OnAttackSequenceEnd
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Postfix()
             {
                 VisibilityCacheGate.ExitGate();

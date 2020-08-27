@@ -16,6 +16,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.Update))]
         public static class H_Update
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Postfix()
             {
                 bool error = false;
@@ -46,6 +51,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(CombatGameState), nameof(CombatGameState.OnCombatGameDestroyed))]
         public static class H_OnCombatGameDestroyed
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Postfix()
             {
                 VisibilityCacheGate.Reset();

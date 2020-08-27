@@ -20,21 +20,23 @@ namespace RogueTechPerfFixes.Injection
 
         public const string VanillaAssemblyPath = @"..\..\BattleTech_Data\Managed\Assembly-CSharp.dll";
 
-        public const string VanillaAssemblyName = "Assembly-CSharp.dll";
-
-        public const string LocalVanillaAssemblyPath = @".\" + VanillaAssemblyName;
+        public const string VanillaAssemblyName = "Assembly-CSharp";
 
         public const string BackUpAssemblyName = "Assembly-CSharp.dll.PerfFix.orig";
 
+        public const string TempAssemblyName = VanillaAssemblyName + ".temp";
+
         public const string CecilLog = @".\CecilLog.txt";
+
+        public static bool HasInjectionError { get; set; }
 
         public static string VanillaAssemblyDir { get; set; }
 
         public static string VanillaAssemblyFullPath { get; set; }
 
-        public static List<IInjector> Injectors { get; } = new List<IInjector>();
+        public static string BackupAssemblyPath { get; set; }
 
-        public static bool HasError { get; private set; }
+        public static List<IInjector> Injectors { get; } = new List<IInjector>();
 
         public static Dictionary<string, TypeDefinition> TypeTable { get; } = new Dictionary<string, TypeDefinition>();
 
@@ -47,31 +49,29 @@ namespace RogueTechPerfFixes.Injection
             {
                 try
                 {
-
                     AssemblyName assemblyName = new AssemblyName(eventArgs.Name);
-                    if (assemblyName.Name == CecilManager.VanillaAssemblyName)
+                    if (assemblyName.Name == VanillaAssemblyName)
                     {
-                        File.AppendAllText(CecilLog, "Loading: " + eventArgs.Name + "\n");
-                        return Assembly.LoadFrom(CecilManager.LocalVanillaAssemblyPath);
+                        WriteLog($"Loading {eventArgs.Name} from {BackupAssemblyPath}");
+                        return Assembly.LoadFrom(BackupAssemblyPath);
                     }
 
-                    string assemblyPath =
-                        Path.Combine(VanillaAssemblyDir, assemblyName.Name + ".dll");
+                    string assemblyPath = Path.Combine(VanillaAssemblyDir, assemblyName.Name + ".dll");
                     if (!File.Exists(assemblyPath))
                     {
-                        File.AppendAllText(CecilLog, $"Can't find {assemblyPath}\n");
+                        WriteLog($"Can't find {assemblyPath}\n");
                         return Assembly.GetExecutingAssembly();
                     }
 
-                    File.AppendAllText(CecilLog, "Loading: " + eventArgs.Name + "\n");
+                    WriteLog($"Loading {eventArgs.Name} from {assemblyPath}");
                     return Assembly.LoadFrom(assemblyPath);
                 }
                 catch (Exception e)
                 {
-                    File.AppendAllText(CecilLog, e + "\n");
+                    WriteLog(e.ToString());
                 }
 
-                File.AppendAllText(CecilLog, "Can't resolve assembly reference\n");
+                WriteLog("Can't resolve assembly reference");
                 return null;
             };
 
@@ -87,22 +87,22 @@ namespace RogueTechPerfFixes.Injection
                     resolver.AddSearchDirectory(VanillaAssemblyDir);
                     parameters.AssemblyResolver = resolver;
 
-                    string bak = Path.Combine(VanillaAssemblyDir, BackUpAssemblyName);
+                    BackupAssemblyPath = Path.Combine(VanillaAssemblyDir, BackUpAssemblyName);
+                    bool hasBackup = false;
 
                     // Restore the original dll if a backup exists.
-                    if (File.Exists(bak))
+                    if (File.Exists(BackupAssemblyPath))
                     {
+                        hasBackup = true;
                         File.Delete(VanillaAssemblyFullPath);
-                        File.Move(bak, VanillaAssemblyFullPath);
+                        File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
                     }
 
                     // Make a backup for the game assembly
-                    File.Copy(VanillaAssemblyFullPath, bak, true);
+                    if (!hasBackup)
+                        File.Copy(VanillaAssemblyFullPath, BackupAssemblyPath, true);
 
-                    // Make a working copy in local
-                    File.Copy(VanillaAssemblyFullPath, LocalVanillaAssemblyPath, true);
-
-                    _assembly = AssemblyDefinition.ReadAssembly(bak, parameters);
+                    _assembly = AssemblyDefinition.ReadAssembly(BackupAssemblyPath, parameters);
                     FieldDefinition RTPFVersion =
                         new FieldDefinition(
                             nameof(RTPFVersion) + Mod.Version.ToString().Replace('.', '_')
@@ -115,12 +115,13 @@ namespace RogueTechPerfFixes.Injection
                         if (type.Name == nameof(UnityGameInstance))
                         {
                             targetType = type;
-                            if (type.Fields.Any(f => f.Name == RTPFVersion.Name))
+                            FieldDefinition field = type.Fields.FirstOrDefault(f => f.Name.StartsWith(nameof(RTPFVersion)));
+                            if (field != null)
                             {
                                 _initialized = false;
-                                File.AppendAllText(CecilLog, $"Already injected with version {RTPFVersion.Name}\n");
+
+                                WriteLog($"Found assembly patched with version {field.Name}");
                                 _assembly.Dispose();
-                                File.Delete(bak);
                                 return;
                             }
                         }
@@ -133,14 +134,12 @@ namespace RogueTechPerfFixes.Injection
                 }
                 catch (Exception e)
                 {
-                    HasError = true;
-                    File.AppendAllText(CecilLog, e.ToString());
+                    WriteLog(e.ToString());
                 }
                 return;
             }
 
-            HasError = true;
-            File.AppendAllText(CecilLog, $"Incorrect file path: {VanillaAssemblyPath} to Assembly-CSharp.dll\n");
+            WriteLog($"Incorrect file path: {VanillaAssemblyPath} to Assembly-CSharp.dll");
         }
 
         public static void Init()
@@ -148,30 +147,44 @@ namespace RogueTechPerfFixes.Injection
             if (!_initialized)
                 return;
 
-            File.AppendAllText(CecilLog, $"Start injecting...\n");
+            WriteLog($"Start injecting...");
 
             try
             {
-                Injectors.Add(new I_DesiredAuraReceptionState());
+                //Injectors.Add(new I_DesiredAuraReceptionState());
+                Injectors.Add(new I_CombatAuraReticle());
                 Injectors.Add(new I_BTLight());
                 Injectors.Add(new I_BTLightController());
+                Injectors.Add(new I_DOTweenAnimation());
                 //Injectors.Add(new I_SortMoveCandidatesByInfMapNode());
 
                 foreach (IInjector injector in Injectors)
                     injector.Inject(TypeTable, _assembly.MainModule);
 
-                if (File.Exists(VanillaAssemblyFullPath))
-                    File.Delete(VanillaAssemblyFullPath);
-
-                _assembly.Write(VanillaAssemblyFullPath);
+                string tempFullPath = Path.Combine(VanillaAssemblyDir, TempAssemblyName);
+                _assembly.Write(tempFullPath);
                 _assembly.Dispose();
-                File.AppendAllText(CecilLog, "All good here.");
+                File.Copy(tempFullPath, VanillaAssemblyFullPath, true);
+                File.Delete(tempFullPath);
+
+                if (!HasInjectionError)
+                    WriteLog("All good here.");
             }
             catch (Exception e)
             {
-                HasError = true;
-                File.AppendAllText(CecilLog, e.ToString());
+                WriteLog(e.ToString());
             }
+        }
+
+        public static void WriteLog(string message)
+        {
+            File.AppendAllText(CecilLog, $"[{DateTime.Now}] {message}\n");
+        }
+
+        public static void WriteError(string message)
+        {
+            HasInjectionError = true;
+            File.AppendAllText(CecilLog, $"[{DateTime.Now}] {message}\n");
         }
     }
 }

@@ -4,20 +4,20 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{382C05D7-3BCE-4E9D-B3D2-8AA85C66871E}</ProjectGuid>
+    <ProjectGuid>{A8A5FA39-36E4-47CC-8A97-C71818A52150}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RogueTechPerfFixes</RootNamespace>
-    <AssemblyName>RogueTechPerfFixes</AssemblyName>
+    <RootNamespace>HarmonyPatches</RootNamespace>
+    <AssemblyName>HarmonyPatches</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>false</Deterministic>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Build\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'InjectionOnly|AnyCPU'">
-    <OutputPath>..\Build\InjectinoOnly\</OutputPath>
+    <OutputPath>bin\InjectionOnly\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -104,20 +104,34 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Build\Release\RogueTechPerfFix\mod.json">
-      <Link>Mod\mod.json</Link>
-    </None>
-    <Compile Include="Models\ActionSemaphore.cs" />
-    <Compile Include="Models\VisibilityCacheGate.cs" />
-    <Compile Include="Mod\Mod.cs" />
-    <Compile Include="Mod\Settings.cs" />
-    <Compile Include="Utils\RTPFLogger.cs" />
-    <Compile Include="Utils\Utils.cs" />
-    <None Include="Cache\CacheManager.cs" />
+    <Compile Include="HarmonyPatches\H_AbstractActor.cs" />
+    <Compile Include="HarmonyPatches\H_ActorMovementSequence.cs" />
+    <Compile Include="HarmonyPatches\H_AttackDirector.cs" />
+    <Compile Include="HarmonyPatches\H_AuraActorBody.cs" />
+    <None Include="HarmonyPatches\H_BresenhamLine.cs" />
+    <Compile Include="HarmonyPatches\H_BTLightController.cs" />
+    <None Include="HarmonyPatches\H_CombatAuraReticle_DesiredAuraReceptionState.cs" />
+    <Compile Include="HarmonyPatches\H_CombatGameState.cs" />
+    <Compile Include="HarmonyPatches\H_DOTweenAnimation.cs" />
+    <Compile Include="HarmonyPatches\H_EffectManager.cs" />
+    <None Include="HarmonyPatches\H_EffectManager_GetAllEffectsTargeting.cs" />
+    <None Include="HarmonyPatches\H_ElementManager_RefreshCommandBuffer.cs" />
+    <Compile Include="HarmonyPatches\H_ExportInfluenceMapToCSV.cs" />
+    <None Include="HarmonyPatches\H_FindBlockerBetween.cs" />
+    <None Include="HarmonyPatches\H_FindBlockerReciprocal.cs" />
+    <Compile Include="HarmonyPatches\H_MissileLauncherEffect__Update.cs" />
+    <None Include="HarmonyPatches\H_SortMoveCandidatesByInfMapNode_Tick.cs" />
+    <Compile Include="HarmonyPatches\H_TerraiWaterHelper.cs" />
+    <None Include="HarmonyPatches\H_TerraiWaterHelper_HasWater.cs" />
+    <Compile Include="HarmonyPatches\H_VisibilityCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\HarmonyUtils.cs" />
-    <None Include="Mod\README.md" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\CustomComponentPerfFix\RogueTechPerfFixes.csproj">
+      <Project>{382c05d7-3bce-4e9d-b3d2-8aa85c66871e}</Project>
+      <Name>RogueTechPerfFixes</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

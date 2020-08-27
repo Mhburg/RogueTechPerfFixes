@@ -23,6 +23,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(new[] { typeof(MapTerrainDataCell), typeof(int) })]
         public static class UpdateWaterHeight
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.CustomUnit;
+            }
+
             public static bool Prefix(MapTerrainDataCell cell)
             {
                 return false;
@@ -144,6 +149,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
     [HarmonyPatch(typeof(Building), "OnActorDestroyed")]
     public static class H_Building_OnActorDestroyed
     {
+        public static bool Prepare()
+        {
+            return Mod.Settings.Patch.CustomUnit;
+        }
+
         public static void Postfix(Building __instance)
         {
             Vector3 pos = __instance.CurrentPosition;
@@ -157,6 +167,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
     [HarmonyPatch(typeof(DropshipGameLogic), "ShowDropshipBasedOnAnimationState")]
     public static class H_DropshipGameLogic
     {
+        public static bool Prepare()
+        {
+            return Mod.Settings.Patch.CustomUnit;
+        }
+
         public static void Postfix(DropshipGameLogic __instance)
         {
             if (!__instance.occupiedCells.Any())
@@ -176,6 +191,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
     [HarmonyPatch("_Init")]
     public static class H_CombatGameState_Init
     {
+        public static bool Prepare()
+        {
+            return Mod.Settings.Patch.CustomUnit;
+        }
+
         public static void Postfix()
         {
             MapTerrainDataCell[,] cells = UnityGameInstance.BattleTechGame.Combat.MapMetaData.mapTerrainDataCells;
@@ -187,7 +207,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             stopwatch.Stop();
 
             stopwatch.Restart();
-            
+
             Parallel.For(0, zIndex, (index) =>
             {
                 for (int i = 0; i < xIndex; i++)
@@ -197,7 +217,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             });
 
             stopwatch.Stop();
-            Utils.Logger.LogError($"{Utils.LOG_HEADER} Total time: {stopwatch.Elapsed.TotalMilliseconds: 0000.0000}ms");
+            RTPFLogger.Error?.Write($"Total time in building water grid: {stopwatch.Elapsed.TotalMilliseconds: 0000.0000}ms");
         }
     }
 }

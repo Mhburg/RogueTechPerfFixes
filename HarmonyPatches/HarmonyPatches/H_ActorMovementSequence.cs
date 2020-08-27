@@ -17,6 +17,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(ActorMovementSequence), nameof(ActorMovementSequence.Update))]
         public static class H_Update
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Prefix()
             {
                 if (!_hasEntered)
@@ -32,6 +37,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(ActorMovementSequence), "CompleteMove")]
         public static class H_CompleteMove
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility;
+            }
+
             public static void Postfix()
             {
                 _hasEntered = false;

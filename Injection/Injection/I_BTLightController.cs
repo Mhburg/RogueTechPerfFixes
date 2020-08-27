@@ -20,6 +20,9 @@ namespace RogueTechPerfFixes.Injection
 
         public void Inject(Dictionary<string, TypeDefinition> typeTable, ModuleDefinition module)
         {
+            if (!Mod.Settings.Patch.Vanilla)
+                return;
+
             if (typeTable.TryGetValue(_targetType, out TypeDefinition type))
             {
                 InjectField(type, module);

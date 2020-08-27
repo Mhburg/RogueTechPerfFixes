@@ -6,8 +6,6 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Harmony;
-using RogueTechPerfFixes.HarmonyPatches;
-using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes
 {

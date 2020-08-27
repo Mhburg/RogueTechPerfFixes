@@ -90,7 +90,7 @@ namespace RogueTechPerfFixes
                 }
                 else
                 {
-                    LogCritical($"Can't acquire lock for writing log.\n");
+                    LogCritical($"Can't acquire lock for writing log.");
                 }
             }
             finally
@@ -102,7 +102,7 @@ namespace RogueTechPerfFixes
 
         private static string FormatMessage(string message)
         {
-            return $"{LOG_HEADER} {DateTime.Now} {message}";
+            return $"{LOG_HEADER} {DateTime.Now} {message}\n";
         }
 
         private RTPFLogger SetMode(Mode mode)

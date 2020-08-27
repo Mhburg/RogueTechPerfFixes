@@ -11,7 +11,12 @@ namespace RogueTechPerfFixes.HarmonyPatches
     [HarmonyPatch(typeof(MissileLauncherEffect), "Update")]
     public static class H_MissileLauncherEffect__Update
     {
-        [HarmonyPriority(900)]
+        public static bool Prepare()
+        {
+            return Mod.Settings.Patch.Vanilla;
+        }
+
+        [HarmonyPriority(Priority.First)]
         public static void Prefix()
         {
             BTLightController.InBatchProcess = true;

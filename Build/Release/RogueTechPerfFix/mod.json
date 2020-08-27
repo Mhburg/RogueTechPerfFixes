@@ -10,6 +10,12 @@
     "Settings": {
         "LogError": true,
         "LogDebug": false,
-        "LogWarning": false
+        "LogWarning": false,
+        "Patch":  {
+            "Vanilla": true,
+            "LowVisibility": true,
+            "CustomActivatableEquipment": true,
+            "CustomUnit": true 
+        }
     }
 }

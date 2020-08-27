@@ -23,6 +23,11 @@ namespace RogueTechPerfFixes.HarmonyPatches
         [HarmonyPatch(typeof(AuraActorBody), nameof(AuraActorBody.ReapplyAllEffects))]
         public static class H_ReapplyAllEffects
         {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.LowVisibility && Mod.Settings.Patch.CustomActivatableEquipment;
+            }
+
             public static void Prefix()
             {
                 VisibilityCacheGate.EnterGate();
