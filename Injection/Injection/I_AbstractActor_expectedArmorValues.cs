@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueTechPerfFixes.Injection
 {
-    /// <summary>
-    /// TODO: Needs to put a lock around it.
-    /// </summary>
+    [Obsolete]
     class I_AbstractActor_expectedArmorValues
     {
     }

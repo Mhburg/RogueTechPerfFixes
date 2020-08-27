@@ -39,11 +39,14 @@ namespace RogueTechPerfFixes.Injection
 
                 InjectField(type, module);
                 if (InitField(type))
+                {
                     InjectIL(type);
+                    CecilManager.WriteLog($"Executed {nameof(I_BTLight)}.\n");
+                }
             }
             else
             {
-                File.AppendAllText(CecilManager.CecilLog, $"Can't find target type: {_targetType}\n");
+                CecilManager.WriteError($"Can't find target type: {_targetType}\n");
             }
         }
 

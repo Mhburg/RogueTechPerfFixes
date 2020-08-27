@@ -9,6 +9,7 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(TerraiWaterHelper), nameof(TerraiWaterHelper.HasWater))]
     public static class H_TerraiWaterHelper_HasWater
     {

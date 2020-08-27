@@ -13,6 +13,7 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(BresenhamLineUtil), nameof(BresenhamLineUtil.BresenhamLine))]
     public static class H_BresenhamLine
     {

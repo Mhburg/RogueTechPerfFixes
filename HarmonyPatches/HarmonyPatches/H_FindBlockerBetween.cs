@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(PathNodeGrid), nameof(PathNodeGrid.FindBlockerBetween))]
     public static class H_FindBlockerBetween
     {

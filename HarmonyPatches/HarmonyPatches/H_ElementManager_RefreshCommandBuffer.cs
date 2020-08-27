@@ -9,6 +9,7 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(ElementManager), nameof(ElementManager.RefreshCommandBuffer))]
     public static class H_ElementManager_RefreshCommandBuffer
     {

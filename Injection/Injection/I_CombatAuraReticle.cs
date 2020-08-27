@@ -34,10 +34,11 @@ namespace RogueTechPerfFixes.Injection
                 InjectField(type, module);
                 InitField(type);
                 InjectIL(type);
+                CecilManager.WriteLog($"Executed {nameof(I_CombatAuraReticle)}.\n");
             }
             else
             {
-                RTPFLogger.LogCritical($"Can't find target type: {_targetType}\n");
+                CecilManager.WriteError($"Can't find target type: {_targetType}\n");
             }
         }
 

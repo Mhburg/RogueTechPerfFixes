@@ -9,6 +9,7 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(EffectManager), nameof(EffectManager.GetAllEffectsTargeting))]
     public static class H_EffectManager_GetAllEffectsTargeting
     {

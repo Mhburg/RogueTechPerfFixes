@@ -12,6 +12,7 @@ using Mono.Collections.Generic;
 
 namespace RogueTechPerfFixes.Injection
 {
+    [Obsolete]
     public class I_DesiredAuraReceptionState : IInjector
     {
         private const string _targetType = "BattleTech.UI.CombatAuraReticle";

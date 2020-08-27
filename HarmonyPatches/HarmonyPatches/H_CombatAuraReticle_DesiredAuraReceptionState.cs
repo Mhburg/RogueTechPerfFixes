@@ -10,6 +10,7 @@ using Harmony;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(CombatAuraReticle), "get_DesiredAuraProjectionState")]
     public static class H_CombatAuraReticle_DesiredAuraReceptionState
     {

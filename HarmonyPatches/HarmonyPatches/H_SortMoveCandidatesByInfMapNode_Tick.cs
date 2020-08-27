@@ -12,6 +12,7 @@ using RogueTechPerfFixes.Injection;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     public static class H_SortMoveCandidatesByInfMapNode_Tick
     {
         private const string TARGET_TYPE_NAME = "SortMoveCandidatesByInfMapNode";

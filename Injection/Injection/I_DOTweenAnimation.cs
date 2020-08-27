@@ -40,10 +40,11 @@ namespace RogueTechPerfFixes.Injection
                 InjectField(type, module);
                 //InitField(type, module);
                 InjectIL(type, module);
+                CecilManager.WriteLog($"Executed {nameof(I_DOTweenAnimation)}.\n");
                 return;
             }
 
-            CecilManager.WriteLog($"Can't find target type: {_targetType}");
+            CecilManager.WriteError($"Can't find target type: {_targetType}");
         }
 
         #endregion

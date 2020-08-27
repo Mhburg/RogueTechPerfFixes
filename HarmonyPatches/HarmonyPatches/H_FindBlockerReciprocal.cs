@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
+    [Obsolete]
     [HarmonyPatch(typeof(PathNodeGrid), nameof(PathNodeGrid.FindBlockerReciprocal))]
     public static class H_FindBlockerReciprocal
     {

@@ -26,7 +26,11 @@ namespace RogueTechPerfFixes.Injection
             if (typeTable.TryGetValue(_targetType, out TypeDefinition type))
             {
                 InjectField(type, module);
+                CecilManager.WriteLog($"Executed {nameof(I_BTLightController)}.\n");
+                return;
             }
+
+            CecilManager.WriteError($"Can't find target type: {_targetType}");
         }
 
         #endregion

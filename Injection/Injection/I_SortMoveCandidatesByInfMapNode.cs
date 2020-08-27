@@ -8,6 +8,7 @@ using Mono.Cecil.Rocks;
 
 namespace RogueTechPerfFixes.Injection
 {
+    [Obsolete]
     public class I_SortMoveCandidatesByInfMapNode : IInjector
     {
         private const string _targetType = "SortMoveCandidatesByInfMapNode";
