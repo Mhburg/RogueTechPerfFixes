@@ -10,6 +10,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
+using UnityEngine;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 
 namespace RogueTechPerfFixes.Injection
@@ -20,9 +21,9 @@ namespace RogueTechPerfFixes.Injection
 
         private static Instruction _getInstanceId;
 
-        private static FieldDefinition InstanceId;
+        private static FieldDefinition TargetId;
 
-        private static FieldDefinition HasInstanceId;
+        private static FieldDefinition HasTargetId;
 
         #region Implementation of IInjector
 
@@ -40,7 +41,6 @@ namespace RogueTechPerfFixes.Injection
                 InjectField(type, module);
                 //InitField(type, module);
                 InjectIL(type, module);
-                CecilManager.WriteLog($"Executed {nameof(I_DOTweenAnimation)}.\n");
                 return;
             }
 
@@ -54,18 +54,18 @@ namespace RogueTechPerfFixes.Injection
             TypeReference intReference = module.ImportReference(typeof(int));
             TypeReference booleanReference = module.ImportReference(typeof(bool));
 
-            InstanceId = new FieldDefinition(
-                nameof(InstanceId)
+            TargetId = new FieldDefinition(
+                nameof(TargetId)
                 , FieldAttributes.Public
                 , intReference);
 
-            HasInstanceId = new FieldDefinition(
-                nameof(HasInstanceId)
+            HasTargetId = new FieldDefinition(
+                nameof(HasTargetId)
                 , FieldAttributes.Public
                 , booleanReference);
 
-            type.Fields.Add(InstanceId);
-            type.Fields.Add(HasInstanceId);
+            type.Fields.Add(TargetId);
+            type.Fields.Add(HasTargetId);
         }
 
         private static void InitField(TypeDefinition type, ModuleDefinition module)
@@ -98,7 +98,7 @@ namespace RogueTechPerfFixes.Injection
 
                 ilProcessor.InsertBefore(
                     ctorEnd
-                    , Instruction.Create(OpCodes.Stfld, InstanceId));
+                    , Instruction.Create(OpCodes.Stfld, TargetId));
             }
         }
 
@@ -113,47 +113,60 @@ namespace RogueTechPerfFixes.Injection
 
             module.ImportReference(typeof(Tween));
             module.ImportReference(typeof(ABSAnimationComponent));
-            FieldReference tween = module.ImportReference(typeof(ABSAnimationComponent).GetField(nameof(ABSAnimationComponent.tween)));
-            if (tween == null)
-            {
-                CecilManager.WriteError($"Can't find target field: tween");
-                return;
-            }
+            module.ImportReference(typeof(Component));
 
+            FieldReference tween = module.ImportReference(typeof(ABSAnimationComponent).GetField(nameof(ABSAnimationComponent.tween)));
+            FieldReference target = module.ImportReference(typeof(DOTweenAnimation).GetField(nameof(DOTweenAnimation.target)));
             FieldReference tweenId = module.ImportReference(typeof(Tween).GetField(nameof(Tween.id)));
 
-            Instruction loadId = Instruction.Create(OpCodes.Ldfld, InstanceId);
+            MethodReference notEqualTo = module.ImportReference(
+                typeof(UnityEngine.Object).GetMethod("op_Inequality", BindingFlags.Public | BindingFlags.Static));
+
+            Instruction loadTargetId = Instruction.Create(OpCodes.Ldfld, TargetId);
+            Instruction loadHasTargetId = Instruction.Create(OpCodes.Ldfld, HasTargetId);
+            Instruction loadTarget = Instruction.Create(OpCodes.Ldfld, target);
             Instruction loadTween = Instruction.Create(OpCodes.Ldfld, tween);
             Instruction setId = Instruction.Create(OpCodes.Stfld, tweenId);
-            Collection<Instruction> instructions = createTween.Body.Instructions;
             Instruction branchLoad = Instruction.Create(OpCodes.Ldarg_0);
+            Instruction branchReturn = Instruction.Create(OpCodes.Ret);
+            Collection<Instruction> instructions = createTween.Body.Instructions;
 
-            // if (this.HasInstanceId) jump to branchLoad
+            // if (this.HasTargetId) return;
             instructions[instructions.Count - 1].OpCode = OpCodes.Ldarg_0;
-            instructions.Add(Instruction.Create(OpCodes.Ldfld, HasInstanceId));
-            instructions.Add(Instruction.Create(OpCodes.Brtrue, branchLoad));
+            instructions.Add(loadHasTargetId);
+            instructions.Add(Instruction.Create(OpCodes.Brtrue, branchReturn));
 
-            // this.InstanceId = this.GetInstanceID();
+            // if (this.target == null) return;
+            instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            instructions.Add(loadTarget);
+            instructions.Add(Instruction.Create(OpCodes.Ldnull));
+            instructions.Add(Instruction.Create(OpCodes.Call, notEqualTo));
+            instructions.Add(Instruction.Create(OpCodes.Brfalse, branchReturn));
+
+            // this.TargetId = this.target.GetInstanceID();
             instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            instructions.Add(loadTarget);
             instructions.Add(_getInstanceId);
-            instructions.Add(Instruction.Create(OpCodes.Stfld, InstanceId));
+            instructions.Add(Instruction.Create(OpCodes.Stfld, TargetId));
 
-            // this.HasInstanceId = true;
+            // this.HasTargetId = true;
             instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             instructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
-            instructions.Add(Instruction.Create(OpCodes.Stfld, HasInstanceId));
+            instructions.Add(Instruction.Create(OpCodes.Stfld, HasTargetId));
 
             // this.tween.id = this.InstanceId;
-            instructions.Add(branchLoad);
-            instructions.Add(loadTween);
-            instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            instructions.Add(loadId);
-            instructions.Add(Instruction.Create(OpCodes.Box, module.ImportReference(typeof(int))));
-            instructions.Add(setId);
+            //instructions.Add(branchLoad);
+            //instructions.Add(loadTween);
+            //instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            //instructions.Add(loadTargetId);
+            //instructions.Add(Instruction.Create(OpCodes.Box, module.ImportReference(typeof(int))));
+            //instructions.Add(setId);
 
             // return;
-            instructions.Add(Instruction.Create(OpCodes.Ret));
+            instructions.Add(branchReturn);
+
+            createTween.Body.OptimizeMacros();
         }
     }
 }

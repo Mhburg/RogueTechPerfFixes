@@ -13,7 +13,9 @@ namespace RogueTechPerfFixes.HarmonyPatches
     {
         public static bool Prepare()
         {
-            return Mod.Settings.Patch.Vanilla;
+            return Mod.Settings.Patch.Vanilla
+                   && typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null
+                   && typeof(BTLightController).GetField(nameof(BTLightController.InBatchProcess), AccessTools.all) != null;
         }
 
         [HarmonyPriority(Priority.First)]

@@ -16,21 +16,21 @@ namespace RogueTechPerfFixes
     {
         private const string LOG_HEADER = "[RTPF]";
 
-        private static SpinLock _spinLock = new SpinLock();
-
         private static readonly ILog _logger = Logger.GetLogger("RogueTechPerfFixes", LogLevel.Debug);
 
         private const string CRITICAL_LOG_NAME = "CriticalLog.txt";
+
+        private static SpinLock _writeLock = new SpinLock();
 
         private static string _criticalLogPath;
 
         private static readonly RTPFLogger _rtpfLogger = new RTPFLogger();
 
-        public static RTPFLogger Debug => Mod.Settings.LogDebug ? _rtpfLogger.SetMode(Mode.Debug) : null;
+        public static LogWriter Debug => Mod.Settings.LogDebug ? new LogWriter(Mode.Debug) : null;
 
-        public static RTPFLogger Error => Mod.Settings.LogError ? _rtpfLogger.SetMode(Mode.Error) : null;
+        public static LogWriter Error => Mod.Settings.LogError ? new LogWriter(Mode.Error) : null;
 
-        public static RTPFLogger Warning => Mod.Settings.LogWarning ? _rtpfLogger.SetMode(Mode.Warning) : null;
+        public static LogWriter Warning => Mod.Settings.LogWarning ? new LogWriter(Mode.Warning) : null;
 
         public static void InitCriticalLogger(string modDirectory)
         {
@@ -56,7 +56,7 @@ namespace RogueTechPerfFixes
         {
         }
 
-        private enum Mode
+        public enum Mode
         {
             Debug,
             Warning,
@@ -65,51 +65,58 @@ namespace RogueTechPerfFixes
 
         private Mode _mode;
 
-        public void Write(string message)
-        {
-            bool acquiredLock = false;
-            try
-            {
-                _spinLock.Enter(ref acquiredLock);
-                if (acquiredLock)
-                {
-                    switch (_mode)
-                    {
-                        case Mode.Debug:
-                            _logger.LogDebug(FormatMessage(message));
-                            break;
-                        case Mode.Error:
-                            _logger.LogError(FormatMessage(message));
-                            break;
-                        case Mode.Warning:
-                            _logger.LogWarning(FormatMessage(message));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-                else
-                {
-                    LogCritical($"Can't acquire lock for writing log.");
-                }
-            }
-            finally
-            {
-                if (acquiredLock)
-                    _spinLock.Exit();
-            }
-        }
-
         private static string FormatMessage(string message)
         {
-            return $"{LOG_HEADER} {DateTime.Now} {message}\n";
+            return $"{LOG_HEADER} {DateTime.Now} {message}";
         }
 
-        private RTPFLogger SetMode(Mode mode)
+        public class LogWriter
         {
-            _mode = mode;
-            return this;
-        }
+            private Mode _mode { get; set; }
 
+            public LogWriter(Mode mode)
+            {
+                _mode = mode;
+            }
+
+            public void Write(string message)
+            {
+                bool refLock = false;
+                try
+                {
+                    _writeLock.Enter(ref refLock);
+                    if (refLock)
+                    {
+                        switch (_mode)
+                        {
+                            case Mode.Debug:
+                                _logger.LogDebug(FormatMessage(message));
+                                break;
+                            case Mode.Error:
+                                _logger.LogError(FormatMessage(message));
+                                break;
+                            case Mode.Warning:
+                                _logger.LogWarning(FormatMessage(message));
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                    else
+                    {
+                        LogCritical($"Can't obtain lock for logging.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogCritical(e.ToString());
+                }
+                finally
+                {
+                    if (refLock)
+                        _writeLock.Exit();
+                }
+            }
+        }
     }
 }

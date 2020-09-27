@@ -65,7 +65,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTween">
-      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\DOTween.dll</HintPath>
+      <HintPath>..\References\DOTween.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTweenPro">
@@ -120,4 +120,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y $(ProjectDir)Mod\README.md $(TargetDir)README.md</PostBuildEvent>
+  </PropertyGroup>
 </Project>

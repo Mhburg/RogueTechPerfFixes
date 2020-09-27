@@ -30,59 +30,31 @@ namespace RogueTechPerfFixes.HarmonyPatches
 
             public static bool Prefix(MapTerrainDataCell cell)
             {
+                if (cell is MapTerrainDataCellEx eCell)
+                {
+                    return !eCell.waterLevelCached;
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(TerraiWaterHelper), nameof(TerraiWaterHelper.UpdateWaterHeightRay))]
+        public static class UpdateWaterHeightRay
+        {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.CustomUnit;
+            }
+
+            public static bool Prefix(MapTerrainDataCellEx ecell)
+            {
+                ecell.UpdateWaterHeightRayNew();
                 return false;
             }
         }
 
-        public static void UpdateWaterHeightNew(this MapTerrainDataCell cell, bool hasWater, int level = 0)
-        {
-            if (Core.Settings.fixWaterHeight && level <= TerraiWaterHelper.MAX_LEVEL)
-            {
-                if (!((level == 0) ? (hasWater = cell.HasWater()) : hasWater))
-                {
-                    return;
-                }
-                MapTerrainDataCellEx mapTerrainDataCellEx = cell as MapTerrainDataCellEx;
-                if (mapTerrainDataCellEx != null && !mapTerrainDataCellEx.waterLevelCached)
-                {
-                    mapTerrainDataCellEx.UpdateWaterHeightRayNew();
-                    int x = mapTerrainDataCellEx.x;
-                    int y = mapTerrainDataCellEx.y;
-                    int num = mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells.GetLength(0) - 1;
-                    int num2 = mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells.GetLength(1) - 1;
-                    if (x > 0 && y > 0)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x - 1, y - 1].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (x > 0)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x - 1, y].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (x < num && y < num2)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x + 1, y + 1].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (y < num2)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x, y + 1].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (x < num)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x + 1, y].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (x < num && y > 0)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x + 1, y - 1].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                    if (x > 0 && y < num2)
-                    {
-                        mapTerrainDataCellEx.mapMetaData.mapTerrainDataCells[x - 1, y + 1].UpdateWaterHeightNew(hasWater, level + 1);
-                    }
-                }
-            }
-        }
-
-        private static void UpdateWaterHeightRayNew(this MapTerrainDataCellEx ecell)
+        public static void UpdateWaterHeightRayNew(this MapTerrainDataCellEx ecell)
         {
             Vector3 vector = ecell.WorldPos();
             Ray ray = new Ray(new Vector3(vector.x, 1000f, vector.z), Vector3.down);
@@ -93,17 +65,19 @@ namespace RogueTechPerfFixes.HarmonyPatches
             float num = float.NaN;
             foreach (RaycastHit raycastHit in array)
             {
-                if (float.IsNaN(num) || raycastHit.point.y > num)
+                if (float.IsNaN(num))
+                    num = raycastHit.point.y;
+
+                if (raycastHit.point.y > num)
                 {
-                    RTPFLogger.Debug?.Write(string.Concat(new object[]
+                    RTPFLogger.Error?.Write(string.Concat(new object[]
                     {
                         "hit pos:",
                         raycastHit.point,
                         " ",
                         raycastHit.collider.gameObject.name,
                         " layer:",
-                        LayerMask.LayerToName(raycastHit.collider.gameObject.layer),
-                        "\n"
+                        LayerMask.LayerToName(raycastHit.collider.gameObject.layer)
                     }));
                     num = raycastHit.point.y;
                 }
@@ -121,8 +95,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
                         "terrain height:",
                         ecell.realTerrainHeight,
                         " water surface height:",
-                        ecell.terrainHeight,
-                        "\n"
+                        ecell.terrainHeight
                     }));
                 }
                 ecell.waterLevelCached = true;
@@ -156,10 +129,17 @@ namespace RogueTechPerfFixes.HarmonyPatches
 
         public static void Postfix(Building __instance)
         {
-            Vector3 pos = __instance.CurrentPosition;
-            if (UnityGameInstance.BattleTechGame.Combat.MapMetaData.GetCellAt(pos) is MapTerrainDataCellEx ex)
+            List<MapEncounterLayerDataCell> cells = ObstructionGameLogic.GetObstructionFromBuilding(
+                    __instance
+                    , UnityGameInstance.BattleTechGame.Combat.ItemRegistry)
+                .occupiedCells;
+
+            foreach (var cell in cells)
             {
-                ex.UpdateWaterHeightNew(false);
+                if (cell.relatedTerrainCell is MapTerrainDataCellEx ex)
+                {
+                    ex.UpdateWaterHeight();
+                }
             }
         }
     }
@@ -181,14 +161,14 @@ namespace RogueTechPerfFixes.HarmonyPatches
             {
                 if (cell.relatedTerrainCell is MapTerrainDataCellEx ex)
                 {
-                    ex.UpdateWaterHeightNew(false);
+                    ex.UpdateWaterHeight();
                 }
             }
         }
     }
 
-    [HarmonyPatch(typeof(CombatGameState))]
-    [HarmonyPatch("_Init")]
+    //[HarmonyPatch(typeof(CombatGameState))]
+    //[HarmonyPatch("_Init")]
     public static class H_CombatGameState_Init
     {
         public static bool Prepare()
@@ -212,7 +192,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             {
                 for (int i = 0; i < xIndex; i++)
                 {
-                    cells[index, i].UpdateWaterHeightNew(false);
+                    cells[index, i].UpdateWaterHeight();
                 }
             });
 

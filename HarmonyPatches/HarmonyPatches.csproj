@@ -65,7 +65,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTween">
-      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\DOTween.dll</HintPath>
+      <HintPath>..\References\DOTween.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTweenPro">
@@ -115,7 +115,7 @@
     <Compile Include="HarmonyPatches\H_DOTweenAnimation.cs" />
     <Compile Include="HarmonyPatches\H_EffectManager.cs" />
     <None Include="HarmonyPatches\H_EffectManager_GetAllEffectsTargeting.cs" />
-    <None Include="HarmonyPatches\H_ElementManager_RefreshCommandBuffer.cs" />
+    <Compile Include="HarmonyPatches\H_ElementManager_RefreshCommandBuffer.cs" />
     <Compile Include="HarmonyPatches\H_ExportInfluenceMapToCSV.cs" />
     <None Include="HarmonyPatches\H_FindBlockerBetween.cs" />
     <None Include="HarmonyPatches\H_FindBlockerReciprocal.cs" />
@@ -134,4 +134,8 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

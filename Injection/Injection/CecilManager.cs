@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BattleTech;
+using Injection.Injection;
 using Mono.Cecil;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
@@ -21,6 +22,8 @@ namespace RogueTechPerfFixes.Injection
         public const string VanillaAssemblyPath = @"..\..\BattleTech_Data\Managed\Assembly-CSharp.dll";
 
         public const string VanillaAssemblyName = "Assembly-CSharp";
+
+        private const string DOTween_NAME = "DOTween.dll";
 
         public const string BackUpAssemblyName = "Assembly-CSharp.dll.PerfFix.orig";
 
@@ -136,6 +139,7 @@ namespace RogueTechPerfFixes.Injection
                 {
                     WriteLog(e.ToString());
                 }
+
                 return;
             }
 
@@ -155,11 +159,15 @@ namespace RogueTechPerfFixes.Injection
                 Injectors.Add(new I_CombatAuraReticle());
                 Injectors.Add(new I_BTLight());
                 Injectors.Add(new I_BTLightController());
-                Injectors.Add(new I_DOTweenAnimation());
+                //Injectors.Add(new I_DOTweenAnimation());
+                //Injectors.Add(new I_ElementManager());
                 //Injectors.Add(new I_SortMoveCandidatesByInfMapNode());
 
                 foreach (IInjector injector in Injectors)
+                {
                     injector.Inject(TypeTable, _assembly.MainModule);
+                    WriteLog($"Injected {injector.GetType().Name}\n");
+                }
 
                 string tempFullPath = Path.Combine(VanillaAssemblyDir, TempAssemblyName);
                 _assembly.Write(tempFullPath);
@@ -167,12 +175,13 @@ namespace RogueTechPerfFixes.Injection
                 File.Copy(tempFullPath, VanillaAssemblyFullPath, true);
                 File.Delete(tempFullPath);
 
+                ReplaceDOTween();
                 if (!HasInjectionError)
                     WriteLog("All good here.");
             }
             catch (Exception e)
             {
-                WriteLog(e.ToString());
+                WriteError(e.ToString());
             }
         }
 
@@ -185,6 +194,45 @@ namespace RogueTechPerfFixes.Injection
         {
             HasInjectionError = true;
             File.AppendAllText(CecilLog, $"[{DateTime.Now}] {message}\n");
+        }
+
+        private static void ReplaceDOTween()
+        {
+            string newFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), DOTween_NAME);
+            string oldFile = Path.Combine(VanillaAssemblyDir, DOTween_NAME);
+
+            AssemblyName oldName = AssemblyName.GetAssemblyName(oldFile);
+            AssemblyName newName = AssemblyName.GetAssemblyName(newFile);
+            if (oldName.Version == newName.Version)
+            {
+                WriteLog($"DOTween is up to date.");
+                return;
+            }
+
+            if (!File.Exists(newFile))
+            {
+                WriteError($"Can't find {DOTween_NAME} at {newFile}.");
+                return;
+            }
+
+            if (!File.Exists(oldFile))
+            {
+                WriteError($"Can't find {DOTween_NAME} at {oldFile}.");
+                return;
+            }
+
+            try
+            {
+                if (oldName.Version == new Version("1.0.0.0"))
+                    File.Copy(oldFile, oldFile + ".orig", true);
+
+                File.Copy(newFile, oldFile, true);
+                WriteLog($"DOTween updated to version {newName.Version}");
+            }
+            catch (Exception e)
+            {
+                WriteError(e.ToString());
+            }
         }
     }
 }

@@ -45,7 +45,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTween">
-      <HintPath>G:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\DOTween.dll</HintPath>
+      <HintPath>..\References\DOTween.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DOTweenPro">
@@ -85,6 +85,7 @@
     <None Include="Injection\I_DesiredAuraReceptionState.cs" />
     <Compile Include="Injection\I_DOTweenAnimation.cs" />
     <None Include="Injection\I_SortMoveCandidatesByInfMapNode.cs" />
+    <Compile Include="Injection\I_ElementManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -94,5 +95,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y $(SolutionDir)References\DOTween.dll $(TargetDir)DOTween.dll</PostBuildEvent>
+  </PropertyGroup>
 </Project>

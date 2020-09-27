@@ -7,11 +7,14 @@ using BattleTech.UI;
 using DG.Tweening;
 using DG.Tweening.Core;
 using Harmony;
+using UnityEngine;
 
 namespace RogueTechPerfFixes.HarmonyPatches
 {
     public static class H_DOTweenAnimation
     {
+        private static readonly Dictionary<object, List<DOTweenAnimation>> _tweenTable = new Dictionary<object, List<DOTweenAnimation>>();
+
         [HarmonyPatch(typeof(DOTweenAnimation), nameof(DOTweenAnimation.DOKill))]
         public static class H_DoKill
         {
@@ -22,14 +25,33 @@ namespace RogueTechPerfFixes.HarmonyPatches
 
             public static bool Prefix(DOTweenAnimation __instance)
             {
-                Tween tween = __instance.tween;
-                if (tween != null)
-                {
-                    DOTween.Kill(tween.id != null ? __instance.tween.id : __instance.tween);
-                    __instance.tween = null;
-                }
+                if (!__instance.tween?.HasTargetId ?? true)
+                    return true;
 
+                DOTween.Kill(__instance.tween.TargetId);
+                __instance.tween = null;
                 return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(DOTweenAnimation), nameof(DOTweenAnimation.CreateTween))]
+        public static class H_CreateTween
+        {
+            public static bool Prepare()
+            {
+                return Mod.Settings.Patch.Vanilla;
+            }
+
+            public static void Postfix(DOTweenAnimation __instance)
+            {
+                Tween tween = __instance.tween;
+                if (tween is null)
+                    return;
+
+                GameObject gameObject = __instance.gameObject;
+                tween.TargetId = gameObject.GetInstanceID();
+                tween.HasTargetId = true;
+                RTPFLogger.Debug?.Write($"Target instance Id: {tween.TargetId}");
             }
         }
     }

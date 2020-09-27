@@ -41,7 +41,6 @@ namespace RogueTechPerfFixes.Injection
                 if (InitField(type))
                 {
                     InjectIL(type);
-                    CecilManager.WriteLog($"Executed {nameof(I_BTLight)}.\n");
                 }
             }
             else

@@ -29,7 +29,6 @@ namespace RogueTechPerfFixes.HarmonyPatches
 
             return true;
         }
-
     }
 
     [HarmonyPatch(typeof(AbstractActor), nameof(AbstractActor.HandleDeath))]

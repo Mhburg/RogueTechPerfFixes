@@ -13,7 +13,7 @@ namespace RogueTechPerfFixes
 {
     public static class Mod
     {
-        private const string HARMONY_PATCH_PATH = "HarmonyPatches.dll";
+        private const string HARMONY_PATCH_NAME = "HarmonyPatches.dll";
 
         private static Settings _settings;
 
@@ -40,7 +40,7 @@ namespace RogueTechPerfFixes
                 Settings = JsonConvert.DeserializeObject<Settings>(settingsJSON);
                 HarmonyUtils.Harmony.PatchAll(
                     Assembly.LoadFrom(Path.Combine(
-                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HARMONY_PATCH_PATH)));
+                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HARMONY_PATCH_NAME)));
             }
             catch (Exception e)
             {
