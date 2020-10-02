@@ -98,8 +98,8 @@ namespace RogueTechPerfFixes.Injection
                     if (File.Exists(BackupAssemblyPath))
                     {
                         hasBackup = true;
-                        //File.Delete(VanillaAssemblyFullPath);
-                        //File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
+                        File.Delete(VanillaAssemblyFullPath);
+                        File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
                     }
 
                     // Make a backup for the game assembly
