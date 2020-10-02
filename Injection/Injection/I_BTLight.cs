@@ -22,6 +22,8 @@ namespace RogueTechPerfFixes.Injection
 
         private static FieldDefinition InstanceId;
 
+        private static MethodDefinition GetInstanceIdLazy;
+
         private static Instruction _getInstanceID;
 
         #region Implementation of IInjector
@@ -38,10 +40,11 @@ namespace RogueTechPerfFixes.Injection
                     , type.Module.ImportReference(typeof(UnityEngine.Object).GetMethod(nameof(UnityEngine.Object.GetInstanceID))));
 
                 InjectField(type, module);
-                if (InitField(type))
-                {
-                    InjectIL(type);
-                }
+                InjectIL(type);
+                //if (InitField(type))
+                //{
+                //    InjectIL(type);
+                //}
             }
             else
             {
@@ -57,19 +60,29 @@ namespace RogueTechPerfFixes.Injection
 
             InstanceId = new FieldDefinition(
                 nameof(InstanceId)
-                , FieldAttributes.Public
+                , FieldAttributes.Private
                 , intReference);
 
             type.Fields.Add(InstanceId);
 
-            //MethodDefinition method = new MethodDefinition("GetInstanctIdLazy", MethodAttributes.Public, intReference);
-            //ILProcessor ilProcessor = method.Body.GetILProcessor();
-            //ilProcessor.Emit(OpCodes.Ldarg_0);
-            //ilProcessor.Emit(OpCodes.Ldfld, InstanceId);
-            //ilProcessor.Emit(OpCodes.Ldc_I4_0);
-            //ilProcessor.Emit(OpCodes.Brtrue);
-            //ilProcessor.Emit(OpCodes.Ldarg_0);
-            //ilProcessor.Emit(_getInstanceID.OpCode, _getInstanceID.Operand as MethodReference);
+            GetInstanceIdLazy = new MethodDefinition("GetInstanctIdLazy", MethodAttributes.Public, intReference);
+            ILProcessor ilProcessor = GetInstanceIdLazy.Body.GetILProcessor();
+            Instruction branchTarget = ilProcessor.Create(OpCodes.Nop);
+            ilProcessor.Emit(OpCodes.Ldarg_0);
+            ilProcessor.Emit(OpCodes.Ldfld, InstanceId);
+            ilProcessor.Emit(OpCodes.Ldc_I4_0);
+            ilProcessor.Emit(OpCodes.Ceq);
+            ilProcessor.Emit(OpCodes.Brfalse_S, branchTarget);
+            ilProcessor.Emit(OpCodes.Ldarg_0);
+            ilProcessor.Emit(OpCodes.Ldarg_0);
+            ilProcessor.Emit(_getInstanceID.OpCode, _getInstanceID.Operand as MethodReference);
+            ilProcessor.Emit(OpCodes.Stfld, InstanceId);
+            ilProcessor.Append(branchTarget);
+            ilProcessor.Emit(OpCodes.Ldarg_0);
+            ilProcessor.Emit(OpCodes.Ldfld, InstanceId);
+            ilProcessor.Emit(OpCodes.Ret);
+
+            type.Methods.Add(GetInstanceIdLazy);
         }
 
         private static bool InitField(TypeDefinition type)
@@ -113,7 +126,7 @@ namespace RogueTechPerfFixes.Injection
                 return;
             }
 
-            Instruction loadField = Instruction.Create(OpCodes.Ldfld, InstanceId);
+            Instruction GetId = Instruction.Create(OpCodes.Call, GetInstanceIdLazy);
 
             List<int> loadFieldPosition = new List<int>(2);
             for (int i = 0; i < method.Body.Instructions.Count; i++)
@@ -135,7 +148,7 @@ namespace RogueTechPerfFixes.Injection
             }
 
             foreach (int i in loadFieldPosition)
-                method.Body.Instructions[i] = loadField;
+                method.Body.Instructions[i] = GetId;
         }
     }
 }

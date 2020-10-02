@@ -89,6 +89,7 @@ namespace RogueTechPerfFixes.Injection
                     DefaultAssemblyResolver resolver = new DefaultAssemblyResolver();
                     resolver.AddSearchDirectory(VanillaAssemblyDir);
                     parameters.AssemblyResolver = resolver;
+                    parameters.ReadWrite = true;
 
                     BackupAssemblyPath = Path.Combine(VanillaAssemblyDir, BackUpAssemblyName);
                     bool hasBackup = false;
@@ -97,15 +98,15 @@ namespace RogueTechPerfFixes.Injection
                     if (File.Exists(BackupAssemblyPath))
                     {
                         hasBackup = true;
-                        File.Delete(VanillaAssemblyFullPath);
-                        File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
+                        //File.Delete(VanillaAssemblyFullPath);
+                        //File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
                     }
 
                     // Make a backup for the game assembly
                     if (!hasBackup)
                         File.Copy(VanillaAssemblyFullPath, BackupAssemblyPath, true);
 
-                    _assembly = AssemblyDefinition.ReadAssembly(BackupAssemblyPath, parameters);
+                    _assembly = AssemblyDefinition.ReadAssembly(VanillaAssemblyFullPath, parameters);
                     FieldDefinition RTPFVersion =
                         new FieldDefinition(
                             nameof(RTPFVersion) + Mod.Version.ToString().Replace('.', '_')
@@ -156,9 +157,11 @@ namespace RogueTechPerfFixes.Injection
             try
             {
                 //Injectors.Add(new I_DesiredAuraReceptionState());
+
                 Injectors.Add(new I_CombatAuraReticle());
                 Injectors.Add(new I_BTLight());
                 Injectors.Add(new I_BTLightController());
+
                 //Injectors.Add(new I_DOTweenAnimation());
                 //Injectors.Add(new I_ElementManager());
                 //Injectors.Add(new I_SortMoveCandidatesByInfMapNode());
@@ -170,10 +173,10 @@ namespace RogueTechPerfFixes.Injection
                 }
 
                 string tempFullPath = Path.Combine(VanillaAssemblyDir, TempAssemblyName);
-                _assembly.Write(tempFullPath);
+                _assembly.Write();
                 _assembly.Dispose();
-                File.Copy(tempFullPath, VanillaAssemblyFullPath, true);
-                File.Delete(tempFullPath);
+                //File.Copy(tempFullPath, VanillaAssemblyFullPath, true);
+                //File.Delete(tempFullPath);
 
                 ReplaceDOTween();
                 if (!HasInjectionError)
