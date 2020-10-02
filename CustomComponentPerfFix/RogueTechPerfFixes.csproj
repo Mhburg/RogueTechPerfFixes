@@ -104,9 +104,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Build\Release\RogueTechPerfFix\mod.json">
-      <Link>Mod\mod.json</Link>
-    </None>
     <Compile Include="Models\ActionSemaphore.cs" />
     <Compile Include="Models\VisibilityCacheGate.cs" />
     <Compile Include="Mod\Mod.cs" />
@@ -116,6 +113,7 @@
     <None Include="Cache\CacheManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\HarmonyUtils.cs" />
+    <None Include="Mod\mod.json" />
     <None Include="Mod\README.md" />
   </ItemGroup>
   <ItemGroup />

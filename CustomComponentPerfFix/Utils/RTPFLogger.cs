@@ -67,7 +67,7 @@ namespace RogueTechPerfFixes
 
         private static string FormatMessage(string message)
         {
-            return $"{LOG_HEADER} {DateTime.Now} {message}";
+            return $"{LOG_HEADER} {message}";
         }
 
         public class LogWriter

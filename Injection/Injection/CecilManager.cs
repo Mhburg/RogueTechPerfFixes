@@ -185,6 +185,19 @@ namespace RogueTechPerfFixes.Injection
             }
         }
 
+        public static bool RestoreVanillaAssembly()
+        {
+            // Restore the original dll if a backup exists.
+            if (File.Exists(BackupAssemblyPath))
+            {
+                File.Delete(VanillaAssemblyFullPath);
+                File.Copy(BackupAssemblyPath, VanillaAssemblyFullPath, true);
+                return true;
+            }
+
+            return false;
+        }
+
         public static void WriteLog(string message)
         {
             File.AppendAllText(CecilLog, $"[{DateTime.Now}] {message}\n");
