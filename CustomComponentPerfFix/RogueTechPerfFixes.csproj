@@ -105,6 +105,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\ActionSemaphore.cs" />
+    <Compile Include="Models\CecilInjector.cs" />
+    <Compile Include="Models\HarmonyPatcher.cs" />
+    <Compile Include="Models\PerformanceFixer.cs" />
     <Compile Include="Models\VisibilityCacheGate.cs" />
     <Compile Include="Mod\Mod.cs" />
     <Compile Include="Mod\Settings.cs" />
