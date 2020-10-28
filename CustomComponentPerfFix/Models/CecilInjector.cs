@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace RogueTechPerfFixes
 {
-    class CecilInjector
+    public class CecilInjector
     {
+        private string _targetAsmAbsPath;
     }
 }

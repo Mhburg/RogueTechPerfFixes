@@ -111,6 +111,7 @@
     <Compile Include="Models\VisibilityCacheGate.cs" />
     <Compile Include="Mod\Mod.cs" />
     <Compile Include="Mod\Settings.cs" />
+    <Compile Include="Utils\Find.cs" />
     <Compile Include="Utils\RTPFLogger.cs" />
     <Compile Include="Utils\Utils.cs" />
     <None Include="Cache\CacheManager.cs" />

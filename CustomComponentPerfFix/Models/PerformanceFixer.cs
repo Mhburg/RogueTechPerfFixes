@@ -12,5 +12,9 @@ namespace RogueTechPerfFixes
     public class PerformanceFixer
     {
         public bool Enable { get; private set; }
+
+        public HarmonyPatcher HarmonyPatcher { get; private set; }
+
+        public CecilInjector CecilInjector { get; private set; }
     }
 }
