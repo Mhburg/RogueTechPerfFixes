@@ -15,7 +15,9 @@ namespace RogueTechPerfFixes
     {
         private static VisibilityCacheGate cacheGate = new VisibilityCacheGate();
 
-        private readonly HashSet<AbstractActor> actors = new HashSet<AbstractActor>();
+        private readonly HashSet<AbstractActor> selfCacheActors = new HashSet<AbstractActor>();
+
+        private readonly HashSet<AbstractActor> biCacheActors = new HashSet<AbstractActor>();
 
         private delegate void CheckForAlertDelegate(VisibilityCache cache);
 
@@ -31,52 +33,27 @@ namespace RogueTechPerfFixes
             {
                 CombatGameState combatGameState = UnityGameInstance.BattleTechGame.Combat;
                 List<ICombatant> combatants = combatGameState.GetAllLivingCombatants();
-                List<ICombatant> uniDirectionalList = new List<ICombatant>();
-                List<ICombatant> biDirectionalList = new List<ICombatant>();
-                List<SharedVisibilityCache> sharedCache = new List<SharedVisibilityCache>();
 
-                foreach (ICombatant combatant in combatants)
+                foreach (AbstractActor actor in selfCacheActors.ToList())
                 {
-                    if (combatant is AbstractActor actor)
+                    if (biCacheActors.Contains(actor))
                     {
-                        if (actors.Contains(actor))
-                        {
-                            uniDirectionalList.Add(actor);
-                        }
-                        else
-                        {
-                            biDirectionalList.Add(actor);
-                        }
-
-                        if (actor.VisibilityCache.ReportVisibilityToParent && !sharedCache.Contains(actor.VisibilityCache.ParentCache))
-                        {
-                            sharedCache.Add(actor.VisibilityCache.ParentCache);
-                        }
+                        selfCacheActors.Remove(actor);
                     }
                 }
 
-                foreach (AbstractActor actor in actors)
+                foreach (AbstractActor actor in selfCacheActors)
                 {
-                    actor.VisibilityCache?.UpdateCacheReciprocal(biDirectionalList);
-                    actor.VisibilityCache?.RebuildCache(uniDirectionalList);
+                    actor.RebuildVisibilityCache(combatants);
                 }
 
-                RebuildSharedCache(sharedCache, combatants);
-
-                if (!biDirectionalList.Any())
+                foreach (AbstractActor actor in biCacheActors)
                 {
-                    List<TurnActor> turnActors = combatGameState.TurnDirector.TurnActors;
-                    List<AITeam> aiTeams = turnActors.OfType<AITeam>().ToList();
-                    foreach (AITeam aiTeam in aiTeams)
-                    {
-                        if (aiTeam.miscCombatants.FirstOrDefault() is AbstractActor actor)
-                        {
-                            CheckForAlert(actor.VisibilityCache);
-                        }
-                    }
+                    actor.UpdateVisibilityCache(combatants);
                 }
 
-                actors.Clear();
+                selfCacheActors.Clear();
+                biCacheActors.Clear();
             };
         }
 
@@ -106,7 +83,12 @@ namespace RogueTechPerfFixes
 
         public static void AddActorToRefresh(AbstractActor actor)
         {
-            cacheGate.actors.Add(actor);
+            cacheGate.selfCacheActors.Add(actor);
+        }
+
+        public static void AddActorToRefreshReciprocal(AbstractActor actor)
+        {
+            cacheGate.biCacheActors.Add(actor);
         }
 
         #region Overrides of ActionSemaphore
@@ -114,7 +96,7 @@ namespace RogueTechPerfFixes
         public override void ResetSemaphore()
         {
             base.ResetSemaphore();
-            actors.Clear();
+            selfCacheActors.Clear();
         }
 
         #endregion

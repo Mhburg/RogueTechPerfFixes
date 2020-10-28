@@ -52,7 +52,7 @@ namespace RogueTechPerfFixes.HarmonyPatches
             {
                 if (VisibilityCacheGate.Active)
                 {
-                    VisibilityCacheGate.AddActorToRefresh(GetOwningActor(__instance));
+                    VisibilityCacheGate.AddActorToRefreshReciprocal(GetOwningActor(__instance));
                     return false;
                 }
 
