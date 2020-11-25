@@ -112,7 +112,6 @@ namespace RogueTechPerfFixes.Injection
                             nameof(RTPFVersion) + Mod.Version.ToString().Replace('.', '_')
                             , FieldAttributes.Private
                             , _assembly.MainModule.ImportReference(typeof(string)));
-
                     TypeDefinition targetType = null;
                     foreach (TypeDefinition type in _assembly.MainModule.Types)
                     {
@@ -161,6 +160,9 @@ namespace RogueTechPerfFixes.Injection
                 Injectors.Add(new I_CombatAuraReticle());
                 Injectors.Add(new I_BTLight());
                 Injectors.Add(new I_BTLightController());
+
+                // DataManager fixes
+                Injectors.Add(new I_AmmunitionDefLoadRequest());
 
                 //Injectors.Add(new I_DOTweenAnimation());
                 //Injectors.Add(new I_ElementManager());
