@@ -50,12 +50,8 @@ namespace Injection.Injection
         {
             const string targetMethod = "Load";
 
+            // From class -> JsonLoadRequest -> StringDataLoadRequest
             TypeDefinition baseType = type.BaseType.Resolve().BaseType.Resolve();
-            foreach (MethodDefinition methodDef in baseType.GetMethods())
-            {
-                CecilManager.WriteLog($" Method: {methodDef.Name}");
-            }
-
             MethodDefinition method =
                 baseType.GetMethods().FirstOrDefault(m => m.Name == targetMethod);
 
@@ -67,84 +63,52 @@ namespace Injection.Injection
 
             ILProcessor ilProcessor = method.Body.GetILProcessor();
 
-            TypeReference asyncJsonLoadRequestTR = module.ImportReference(typeof(AsyncJsonLoadRequest));
-            VariableDefinition asyncJsonLoadRequestVD = new VariableDefinition(asyncJsonLoadRequestTR);
-            method.Body.Variables.Add(asyncJsonLoadRequestVD);
+            TypeReference ajlr_TR = module.ImportReference(typeof(AsyncJsonLoadRequest));
+            TypeReference taskTR = module.ImportReference(typeof(Task));
+
+            MethodReference ajlr_lr_MR = new MethodReference("LoadResource", taskTR, ajlr_TR);
+            TypeReference stringTR = module.ImportReference(typeof(string));
+            ajlr_lr_MR.Parameters.Add(new ParameterDefinition(stringTR));
+
+            TypeReference actionStringTR = module.ImportReference(typeof(Action<string>));
+            ajlr_lr_MR.Parameters.Add(new ParameterDefinition(actionStringTR));
+
+            //TypeReference boolTR = module.ImportReference(typeof(bool));
+            //ajlr_lr_MR.Parameters.Add(new ParameterDefinition(boolTR));
+
+            //ajlr_lr_MR.MethodReturnType = new MethodReturnType(ajlr_lr_MR);
+            //ajlr_lr_MR.MethodReturnType.ReturnType = taskTR;
+            ajlr_lr_MR.ReturnType = taskTR;
+
+            MethodReference ajlr_lr_Imported_MR = module.ImportReference(ajlr_lr_MR);
 
             for (int i = 0; i < method.Body.Instructions.Count - 1; i++)
             {
                 Instruction instruction = method.Body.Instructions[i];
                 if (instruction.OpCode == OpCodes.Callvirt &&
-                    instruction.Operand != null &&
-                    instruction.Operand.GetType().FullName.StartsWith("HBS.Data.DataLoader::LoadResource"))
+                    instruction.Operand is MethodDefinition methodDef)
                 {
-                    CecilManager.WriteLog($"Found injection point: {instruction.Operand.GetType().FullName}\n");
-                    method.Body.Instructions[i] = ilProcessor.Create(OpCodes.Call, method);
+                    //CecilManager.WriteLog($"Found methodDef: {methodDef.FullName}");
 
-                    // Look for preceeding methods at -7, -8
-
-                    if (i - 7 > 0 &&
-                        method.Body.Instructions[i - 7].OpCode == OpCodes.Ldfld)
+                    if (methodDef.FullName.StartsWith("System.Void HBS.Data.DataLoader::LoadResource"))
                     {
-                        CecilManager.WriteLog($" WIPING LDFLD");
-                        method.Body.Instructions[i - 7].Operand = OpCodes.Nop;
-                        method.Body.Instructions[i - 7].Operand = null;
-                    }
-                    else
-                        CecilManager.WriteError($" NOT LDFLD - SHIT GONNA BREAK");
+                        CecilManager.WriteLog($"Found injection point: {methodDef.FullName}\n");
+                        method.Body.Instructions[i] = ilProcessor.Create(OpCodes.Call, ajlr_lr_Imported_MR);
 
-                    if (i - 8 > 0 &&
-                        method.Body.Instructions[i - 8].OpCode == OpCodes.Ldfld)
-                    {
-                        CecilManager.WriteLog($" WIPING LDFLD");
-                        method.Body.Instructions[i - 8].Operand = OpCodes.Nop;
-                        method.Body.Instructions[i - 8].Operand = null;
-                    }
-                    else
-                        CecilManager.WriteError($" NOT LDFLD - SHIT GONNA BREAK");
+                        // Look for preceeding methods at -7, -8
+                        //method.Body.Instructions[i - 8].OpCode = OpCodes.Nop;
+                        //method.Body.Instructions[i - 8].Operand = null;
 
+                        //method.Body.Instructions[i - 7].OpCode = OpCodes.Nop;
+                        //method.Body.Instructions[i - 7].Operand = null;
+
+                        //method.Body.Instructions[i - 6].OpCode = OpCodes.Nop;
+                        //method.Body.Instructions[i - 6].Operand = null;
+                    }
                 }
             }
 
-
-            //Instruction methodStart = method.Body.Instructions[0];
-
-            //List<Instruction> newInstructions = CreateInstructions(ilProcessor, methodStart);
-            //newInstructions.Reverse();
-
-            //foreach (Instruction instruction in newInstructions)
-            //{
-            //    ilProcessor.InsertBefore(method.Body.Instructions[0], instruction);
-            //}
         }
 
-        //private static List<Instruction> CreateInstructions(ILProcessor ilProcessor, Instruction branchTarget)
-        //{
-        //    List<Instruction> instructions = new List<Instruction>()
-        //    {
-        //        // int remainder = _counter % _interval;
-        //        ilProcessor.Create(OpCodes.Ldarg_0),
-        //        ilProcessor.Create(OpCodes.Ldfld, _counter),
-        //        ilProcessor.Create(OpCodes.Ldsfld, _interval),
-        //        ilProcessor.Create(OpCodes.Rem_Un),
-
-        //        // _counter++;
-        //        ilProcessor.Create(OpCodes.Ldarg_0),
-        //        ilProcessor.Create(OpCodes.Ldarg_0),
-        //        ilProcessor.Create(OpCodes.Ldfld, _counter),
-        //        ilProcessor.Create(OpCodes.Ldc_I4_1),
-        //        ilProcessor.Create(OpCodes.Add),
-        //        ilProcessor.Create(OpCodes.Stfld, _counter),
-
-        //        // if (equal) goto branchTarget;
-        //        ilProcessor.Create(OpCodes.Brfalse, branchTarget),
-
-        //        // return;
-        //        ilProcessor.Create(OpCodes.Ret),
-        //    };
-
-        //    return instructions;
-        //}
-    
     }
 }

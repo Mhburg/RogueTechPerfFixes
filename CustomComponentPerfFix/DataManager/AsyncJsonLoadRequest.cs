@@ -12,17 +12,19 @@ namespace RogueTechPerfFixes.DataManager
     {
 		private static readonly ILog logger = Logger.GetLogger("DataLoader", LogLevel.Log);
 
-		public static async Task LoadResource(string path, Action<string> handler, bool monitor)
+		public static async Task LoadResource(string path, Action<string> handler)
 		{
 			try
 			{
 				using (FileStream arg = new FileStream(path, FileMode.Open, FileAccess.Read))
 				{
 					StreamReader sr = new StreamReader(arg);
-					await sr.ReadToEndAsync();
+					//logger.Log($"Reading file at path: {path}");
+					string content = await sr.ReadToEndAsync();
 
-					// TODO: Add DataLoader.Entry refernces here, so file update monitoring can happen -or- replicate with our own
-					handler(sr.ToString());
+					// TODO: Add DataLoader.Entry references here, so file update monitoring can happen -or- replicate with our own
+					//logger.Log($"Handling file at path: {path} with content: {content}");
+					handler(content);
 				}
 			}
 			catch (Exception exception)
