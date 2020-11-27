@@ -82,6 +82,7 @@ namespace Injection.Injection
 
             MethodReference ajlr_lr_Imported_MR = module.ImportReference(ajlr_lr_MR);
 
+            int targetIdx = -1;
             for (int i = 0; i < method.Body.Instructions.Count - 1; i++)
             {
                 Instruction instruction = method.Body.Instructions[i];
@@ -93,19 +94,28 @@ namespace Injection.Injection
                     if (methodDef.FullName.StartsWith("System.Void HBS.Data.DataLoader::LoadResource"))
                     {
                         CecilManager.WriteLog($"Found injection point: {methodDef.FullName}\n");
-                        method.Body.Instructions[i] = ilProcessor.Create(OpCodes.Call, ajlr_lr_Imported_MR);
-
-                        // Look for preceeding methods at -7, -8
-                        //method.Body.Instructions[i - 8].OpCode = OpCodes.Nop;
-                        //method.Body.Instructions[i - 8].Operand = null;
-
-                        //method.Body.Instructions[i - 7].OpCode = OpCodes.Nop;
-                        //method.Body.Instructions[i - 7].Operand = null;
-
-                        //method.Body.Instructions[i - 6].OpCode = OpCodes.Nop;
-                        //method.Body.Instructions[i - 6].Operand = null;
+                        targetIdx = i;
                     }
                 }
+            }
+            if (targetIdx != -1)
+            {
+                // Replace callvirt for dataManager.dataLoader.LoadResource with call to AsyncJsonLoadRequest
+                method.Body.Instructions[targetIdx] = ilProcessor.Create(OpCodes.Call, ajlr_lr_Imported_MR);
+
+                // Elminate references to dataLoader (no longer used)
+                method.Body.Instructions[targetIdx - 9].OpCode = OpCodes.Nop;
+                method.Body.Instructions[targetIdx - 9].Operand = null;
+
+                method.Body.Instructions[targetIdx - 8].OpCode = OpCodes.Nop;
+                method.Body.Instructions[targetIdx - 8].Operand = null;
+
+                method.Body.Instructions[targetIdx - 7].OpCode = OpCodes.Nop;
+                method.Body.Instructions[targetIdx - 7].Operand = null;
+
+                // Add a pop to remove the async Task (to eliminate dnSpy decompile err)
+                Instruction popInst = ilProcessor.Create(OpCodes.Pop);
+                ilProcessor.InsertAfter(method.Body.Instructions[targetIdx], popInst);
             }
 
         }
