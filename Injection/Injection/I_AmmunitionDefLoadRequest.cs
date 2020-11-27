@@ -26,8 +26,6 @@ namespace Injection.Injection
 
             if (typeTable.TryGetValue(_baseType, out TypeDefinition type))
             {
-                //InjectField(type, module);
-                //InitField(type);
                 CecilManager.WriteLog($"Found baseType: {_baseType}");
 
                 foreach (TypeDefinition nestedType in type.NestedTypes)
@@ -63,6 +61,7 @@ namespace Injection.Injection
 
             ILProcessor ilProcessor = method.Body.GetILProcessor();
 
+            // Add a enew reference to an importable method call for AsyncJsonLoadRequest.Load()
             TypeReference ajlr_TR = module.ImportReference(typeof(AsyncJsonLoadRequest));
             TypeReference taskTR = module.ImportReference(typeof(Task));
 
@@ -72,16 +71,11 @@ namespace Injection.Injection
 
             TypeReference actionStringTR = module.ImportReference(typeof(Action<string>));
             ajlr_lr_MR.Parameters.Add(new ParameterDefinition(actionStringTR));
-
-            //TypeReference boolTR = module.ImportReference(typeof(bool));
-            //ajlr_lr_MR.Parameters.Add(new ParameterDefinition(boolTR));
-
-            //ajlr_lr_MR.MethodReturnType = new MethodReturnType(ajlr_lr_MR);
-            //ajlr_lr_MR.MethodReturnType.ReturnType = taskTR;
             ajlr_lr_MR.ReturnType = taskTR;
 
             MethodReference ajlr_lr_Imported_MR = module.ImportReference(ajlr_lr_MR);
 
+            // Walk the instructions to find the target. Don't mutate as we go, so we can use insertAfter later.
             int targetIdx = -1;
             for (int i = 0; i < method.Body.Instructions.Count - 1; i++)
             {

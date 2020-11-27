@@ -163,6 +163,7 @@ namespace RogueTechPerfFixes.Injection
 
                 // DataManager fixes
                 Injectors.Add(new I_AmmunitionDefLoadRequest());
+                Injectors.Add(new I_DataManager());
 
                 //Injectors.Add(new I_DOTweenAnimation());
                 //Injectors.Add(new I_ElementManager());

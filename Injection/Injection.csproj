@@ -83,6 +83,7 @@
     <Compile Include="Injection\CecilManager.cs" />
     <None Include="Injection\I_AbstractActor_expectedArmorValues.cs" />
     <Compile Include="Injection\IInjector.cs" />
+    <Compile Include="Injection\I_DataManager.cs" />
     <Compile Include="Injection\I_AmmunitionDefLoadRequest.cs" />
     <Compile Include="Injection\I_BTLight.cs" />
     <Compile Include="Injection\I_BTLightController.cs" />
