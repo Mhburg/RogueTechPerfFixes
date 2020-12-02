@@ -25,8 +25,6 @@ namespace RogueTechPerfFixes.DataManager
 		{
 			try
 			{
-
-
 				using (FileStream arg = new FileStream(path, FileMode.Open, FileAccess.Read))
 				{
 					StreamReader sr = new StreamReader(arg);
