@@ -84,7 +84,7 @@
     <None Include="Injection\I_AbstractActor_expectedArmorValues.cs" />
     <Compile Include="Injection\IInjector.cs" />
     <Compile Include="Injection\I_DataManager.cs" />
-    <Compile Include="Injection\I_AmmunitionDefLoadRequest.cs" />
+    <Compile Include="Injection\I_StringDataLoadRequest.cs" />
     <Compile Include="Injection\I_BTLight.cs" />
     <Compile Include="Injection\I_BTLightController.cs" />
     <Compile Include="Injection\I_CombatAuraReticle.cs" />

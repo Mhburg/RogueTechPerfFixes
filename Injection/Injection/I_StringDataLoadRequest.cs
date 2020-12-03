@@ -12,7 +12,10 @@ using System.Threading.Tasks;
 
 namespace Injection.Injection
 {
-    class I_AmmunitionDefLoadRequest : IInjector
+    // Changes DataManager.LoadResource(string path, Action<string> handler) to support async loads of files.
+    //   This significantly improves the load time as IO is waits together instead of blocking.
+    //   We target AmmunitionDefLoadRequest as it's the first name that inherits from StringDataLoadRequest
+    class I_StringDataLoadRequest : IInjector
     {
         private const string _baseType = "BattleTech.Data.DataManager";
         private const string _targetType = "BattleTech.Data.DataManager/AmmunitionDefLoadRequest";

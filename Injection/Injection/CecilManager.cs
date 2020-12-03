@@ -156,14 +156,13 @@ namespace RogueTechPerfFixes.Injection
             try
             {
                 //Injectors.Add(new I_DesiredAuraReceptionState());
-
                 Injectors.Add(new I_CombatAuraReticle());
                 Injectors.Add(new I_BTLight());
                 Injectors.Add(new I_BTLightController());
 
                 // DataManager fixes
-                Injectors.Add(new I_AmmunitionDefLoadRequest());
-                Injectors.Add(new I_DataManager());
+                Injectors.Add(new I_StringDataLoadRequest());
+                //Injectors.Add(new I_DataManager());
 
                 //Injectors.Add(new I_DOTweenAnimation());
                 //Injectors.Add(new I_ElementManager());

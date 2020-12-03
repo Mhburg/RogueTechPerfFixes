@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Injection.Injection
 {
+    // Injector that logs the DataManager load requests by type
     class I_DataManager : IInjector
     {
         private const string _targetType = "BattleTech.Data.DataManager";
